@@ -13,3 +13,9 @@
 .externalNativeBuild
 .cxx
 local.properties
+
+# Legacy Eclipse project files
+.classpath
+.project
+.cproject
+.settings/
