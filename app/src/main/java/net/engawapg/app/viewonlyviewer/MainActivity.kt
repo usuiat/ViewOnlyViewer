@@ -22,20 +22,6 @@ class MainActivity : ComponentActivity() {
 
     private val viewModel: MainViewModel by viewModel()
 
-    /* Permissionの結果を受け取る */
-    private val permissionRequest = registerForActivityResult(
-        ActivityResultContracts.RequestPermission()
-    ){ granted ->
-        viewModel.permissionState.value = when {
-            /* 承認 */
-            granted -> PermissionState.GRANTED
-            /* 拒否(1回目) Permissionが必要な理由を説明 */
-            shouldShowRequestPermissionRationale(REQ_PERMISSION) -> PermissionState.EXPLAINING
-            /* 拒否(2回目以降) */
-            else -> PermissionState.DENIED
-        }
-    }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         checkPermission()
@@ -56,6 +42,25 @@ class MainActivity : ComponentActivity() {
                     }
                 }
             }
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        viewModel.loadGallery()
+    }
+
+    /* Permissionの結果を受け取る */
+    private val permissionRequest = registerForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ){ granted ->
+        viewModel.permissionState.value = when {
+            /* 承認 */
+            granted -> PermissionState.GRANTED
+            /* 拒否(1回目) Permissionが必要な理由を説明 */
+            shouldShowRequestPermissionRationale(REQ_PERMISSION) -> PermissionState.EXPLAINING
+            /* 拒否(2回目以降) */
+            else -> PermissionState.DENIED
         }
     }
 

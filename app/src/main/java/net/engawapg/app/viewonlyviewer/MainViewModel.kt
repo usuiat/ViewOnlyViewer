@@ -1,7 +1,8 @@
 package net.engawapg.app.viewonlyviewer
 
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
 
 enum class PermissionState {
     UNKNOWN,
@@ -10,6 +11,12 @@ enum class PermissionState {
     EXPLAINING  /* 追加説明が必要 */
 }
 
-class MainViewModel(model: GalleryModel): ViewModel() {
+class MainViewModel(private val model: GalleryModel, app: Application): AndroidViewModel(app) {
     val permissionState = MutableLiveData<PermissionState>().apply { value = PermissionState.UNKNOWN }
+
+    fun loadGallery() {
+        if (permissionState.value == PermissionState.GRANTED) {
+            model.load(getApplication())
+        }
+    }
 }
