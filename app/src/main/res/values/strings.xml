@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">ViewOnlyViewer</string>
+    <string name="rationale_permission">Please allow access to the storage so that the app can display photos and videos.</string>
+    <string name="ok">OK</string>
+    <string name="cancel">Cancel</string>
+    <string name="request_to_grant_permission">Please grant permission to access to the storage in the setting app so that the app can display photos and videos</string>
 </resources>

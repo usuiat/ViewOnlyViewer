@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">みるだけ</string>
+    <string name="rationale_permission">アプリが写真や動画を表示できるように、ストレージへのアクセスを許可してください。</string>
+    <string name="ok">OK</string>
+    <string name="cancel">キャンセル</string>
+    <string name="request_to_grant_permission">アプリが写真や動画を表示できるように、設定アプリでストレージへのアクセスを許可してください。</string>
+</resources>
