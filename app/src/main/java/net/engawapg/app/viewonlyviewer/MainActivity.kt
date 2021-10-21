@@ -81,15 +81,28 @@ class MainActivity : ComponentActivity() {
 fun GalleryScreen(viewModel: MainViewModel, onRationaleDialogResult: (Boolean)->Unit) {
     /* Permissionの取得状況によって表示内容を変える */
     val permissionState: PermissionState by viewModel.permissionState.observeAsState(PermissionState.UNKNOWN)
+    val items: List<GalleryItem> by viewModel.galleryItems.observeAsState(listOf())
     when (permissionState) {
         /* 承認: ギャラリー表示 */
-        PermissionState.GRANTED -> Text("Granted!")
+        PermissionState.GRANTED -> Gallery(items)
         /* 拒否: 設定で許可するように説明 */
-        PermissionState.DENIED -> Text(stringResource(R.string.request_to_grant_permission))
+        PermissionState.DENIED -> AskPermissionInSettingApp()
         /* 拒否（1回目）: Permissionが必要な理由をダイアログで説明 */
         PermissionState.EXPLAINING -> PermissionRationaleDialog(onRationaleDialogResult)
         else -> {}
     }
+}
+
+@Composable
+fun Gallery(items: List<GalleryItem>) {
+    if (items.isNotEmpty()) {
+        Text("items.size = ${items.size}")
+    }
+}
+
+@Composable
+fun AskPermissionInSettingApp() {
+    Text(stringResource(R.string.request_to_grant_permission))
 }
 
 @Composable
