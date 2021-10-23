@@ -5,6 +5,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -17,6 +18,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.core.content.PermissionChecker
+import coil.Coil
+import coil.ImageLoader
+import coil.annotation.ExperimentalCoilApi
+import coil.decode.VideoFrameDecoder
+import coil.fetch.VideoFrameFileFetcher
+import coil.fetch.VideoFrameUriFetcher
 import net.engawapg.app.viewonlyviewer.ui.theme.ViewOnlyViewerTheme
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
@@ -28,9 +35,21 @@ class MainActivity : ComponentActivity() {
 
     private val viewModel: MainViewModel by viewModel()
 
+    @ExperimentalCoilApi
+    @ExperimentalFoundationApi
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         checkPermission()
+
+        val imageLoader = ImageLoader.Builder(this)
+            .componentRegistry {
+                add(VideoFrameFileFetcher(this@MainActivity))
+                add(VideoFrameUriFetcher(this@MainActivity))
+                add(VideoFrameDecoder(this@MainActivity))
+            }
+            .crossfade(true)
+            .build()
+        Coil.setImageLoader(imageLoader)
 
         setContent {
             ViewOnlyViewerTheme {
@@ -83,6 +102,8 @@ class MainActivity : ComponentActivity() {
     }
 }
 
+@ExperimentalCoilApi
+@ExperimentalFoundationApi
 @Composable
 fun GalleryScreen(viewModel: MainViewModel, onRationaleDialogResult: (Boolean)->Unit) {
     /* Permissionの取得状況によって表示内容を変える */
@@ -96,13 +117,6 @@ fun GalleryScreen(viewModel: MainViewModel, onRationaleDialogResult: (Boolean)->
         /* 拒否（1回目）: Permissionが必要な理由をダイアログで説明 */
         PermissionState.EXPLAINING -> PermissionRationaleDialog(onRationaleDialogResult)
         else -> {}
-    }
-}
-
-@Composable
-fun Gallery(items: List<GalleryItem>) {
-    if (items.isNotEmpty()) {
-        Text("items.size = ${items.size}")
     }
 }
 
