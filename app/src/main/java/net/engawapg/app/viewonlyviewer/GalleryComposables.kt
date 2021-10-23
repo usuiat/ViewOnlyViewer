@@ -10,8 +10,13 @@ import androidx.compose.foundation.lazy.GridCells
 import androidx.compose.foundation.lazy.LazyVerticalGrid
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.BlendMode
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import coil.annotation.ExperimentalCoilApi
 import coil.compose.rememberImagePainter
@@ -35,12 +40,32 @@ fun Gallery(items: List<GalleryItem>, onItemSelected: (Int)->Unit = {}) {
 @Composable
 fun GalleryItem(item: GalleryItem, onSelected: ()->Unit) {
     Box(
-        modifier = Modifier.aspectRatio(1f).padding(1.dp).clickable { onSelected() }
+        modifier = Modifier
+            .aspectRatio(1f)
+            .padding(1.dp)
+            .clickable { onSelected() }
     ) {
+
+        /* Videoは白いアイコンをオーバーレイするので、見えやすいようにサムネイル画像を少し暗くする */
+        val filter = if (item.isVideo) {
+            ColorFilter.tint(Color(0xffdddddd), BlendMode.Multiply)
+        } else {
+            null
+        }
+
         Image(
             painter = rememberImagePainter(item.uri),
             contentDescription = "Image",
-            contentScale = ContentScale.Crop
+            contentScale = ContentScale.Crop,
+            colorFilter = filter
         )
+
+        if (item.isVideo) {
+            Image(
+                painter = painterResource(id = R.drawable.videoindicator),
+                contentDescription = "videoIndicator",
+                modifier = Modifier.align(Alignment.TopEnd).padding(4.dp)
+            )
+        }
     }
 }
