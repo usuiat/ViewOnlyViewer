@@ -29,6 +29,7 @@ import coil.annotation.ExperimentalCoilApi
 import coil.decode.VideoFrameDecoder
 import coil.fetch.VideoFrameFileFetcher
 import coil.fetch.VideoFrameUriFetcher
+import com.google.accompanist.pager.ExperimentalPagerApi
 import net.engawapg.app.viewonlyviewer.ui.theme.ViewOnlyViewerTheme
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
@@ -40,6 +41,7 @@ class MainActivity : ComponentActivity() {
 
     private val viewModel: MainViewModel by viewModel()
 
+    @ExperimentalPagerApi
     @ExperimentalCoilApi
     @ExperimentalFoundationApi
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -107,6 +109,7 @@ class MainActivity : ComponentActivity() {
     }
 }
 
+@ExperimentalPagerApi
 @ExperimentalCoilApi
 @ExperimentalFoundationApi
 @Composable
@@ -124,7 +127,8 @@ fun AppScreen(viewModel: MainViewModel, onRationaleDialogResult: (Boolean) -> Un
             route = "viewer/{index}",
             arguments = listOf(navArgument("index") { type = NavType.IntType })
         ) { backStackEntry ->
-            ViewerScreen(index = backStackEntry.arguments?.getInt("index") ?: 0)
+            val index = backStackEntry.arguments?.getInt("index") ?: 0
+            ViewerScreen(viewModel = viewModel, index = index)
         }
     }
 }
