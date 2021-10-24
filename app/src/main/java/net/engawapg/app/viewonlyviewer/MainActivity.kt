@@ -18,6 +18,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.core.content.PermissionChecker
+import androidx.navigation.NavType
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.navArgument
+import androidx.navigation.compose.rememberNavController
 import coil.Coil
 import coil.ImageLoader
 import coil.annotation.ExperimentalCoilApi
@@ -55,7 +60,7 @@ class MainActivity : ComponentActivity() {
             ViewOnlyViewerTheme {
                 // A surface container using the 'background' color from the theme
                 Surface(color = MaterialTheme.colors.background) {
-                    GalleryScreen(viewModel = viewModel) { rationaleResult ->
+                    AppScreen(viewModel = viewModel) { rationaleResult ->
                         if (rationaleResult) {
                             /* Permissionが必要な理由を説明し、了承されたので再度Permission要求 */
                             viewModel.permissionState.value = PermissionState.UNKNOWN
@@ -105,13 +110,39 @@ class MainActivity : ComponentActivity() {
 @ExperimentalCoilApi
 @ExperimentalFoundationApi
 @Composable
-fun GalleryScreen(viewModel: MainViewModel, onRationaleDialogResult: (Boolean)->Unit) {
+fun AppScreen(viewModel: MainViewModel, onRationaleDialogResult: (Boolean) -> Unit) {
+    val navController = rememberNavController()
+    NavHost(navController = navController, startDestination = "gallery") {
+        composable("gallery") {
+            GalleryScreen(
+                viewModel = viewModel,
+                onItemSelected = { index -> navController.navigate("viewer/$index") },
+                onRationaleDialogResult = onRationaleDialogResult
+            )
+        }
+        composable(
+            route = "viewer/{index}",
+            arguments = listOf(navArgument("index") { type = NavType.IntType })
+        ) { backStackEntry ->
+            ViewerScreen(index = backStackEntry.arguments?.getInt("index") ?: 0)
+        }
+    }
+}
+
+@ExperimentalCoilApi
+@ExperimentalFoundationApi
+@Composable
+fun GalleryScreen(
+    viewModel: MainViewModel,
+    onItemSelected: (Int)->Unit = {},
+    onRationaleDialogResult: (Boolean)->Unit
+) {
     /* Permissionの取得状況によって表示内容を変える */
     val permissionState: PermissionState by viewModel.permissionState.observeAsState(PermissionState.UNKNOWN)
     val items: List<GalleryItem> by viewModel.galleryItems.observeAsState(listOf())
     when (permissionState) {
         /* 承認: ギャラリー表示 */
-        PermissionState.GRANTED -> Gallery(items)
+        PermissionState.GRANTED -> Gallery(items, onItemSelected)
         /* 拒否: 設定で許可するように説明 */
         PermissionState.DENIED -> AskPermissionInSettingApp()
         /* 拒否（1回目）: Permissionが必要な理由をダイアログで説明 */
