@@ -46,15 +46,17 @@ fun ViewerScreen(viewModel: MainViewModel, index: Int) {
 @Composable
 fun Viewer(item: GalleryItem, isCurrentPage: Boolean) {
     Box(modifier = Modifier.fillMaxSize()) {
-        var videoPlaying by remember { mutableStateOf(false) }
-        if (item.isVideo && isCurrentPage) {
-            VideoPlayer(item = item) {
-                videoPlaying = true
+        if (item.isVideo) {
+            var videoPlaying by remember { mutableStateOf(false) }
+            if (isCurrentPage) {
+                VideoPlayer(item = item) {
+                    videoPlaying = true
+                }
+            }
+            if (!isCurrentPage || !videoPlaying) {
+                ImageViewer(item)
             }
         } else {
-            videoPlaying = false
-        }
-        if (!videoPlaying) {
             ImageViewer(item)
         }
     }
