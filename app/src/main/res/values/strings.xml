@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">ViewOnlyViewer</string>
+    <string name="app_name">Photo</string>
     <string name="rationale_permission">Please allow access to the storage so that the app can display photos and videos.</string>
     <string name="ok">OK</string>
     <string name="cancel">Cancel</string>
