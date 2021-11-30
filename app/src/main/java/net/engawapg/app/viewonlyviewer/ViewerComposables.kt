@@ -75,6 +75,7 @@ fun Viewer(item: GalleryItem, isCurrentPage: Boolean) {
                 VideoPlayer(
                     item = item,
                     playState = playState,
+                    onPreparing = { playState = PlayState.Preparing },
                     onStart = { playState = PlayState.Playing },
                     onComplete = { playState = PlayState.Pausing }
                 )
@@ -105,7 +106,7 @@ fun ImageViewer(item: GalleryItem) {
 }
 
 @Composable
-fun VideoPlayer(item: GalleryItem, playState: PlayState, onStart: ()->Unit, onComplete: ()->Unit) {
+fun VideoPlayer(item: GalleryItem, playState: PlayState, onPreparing: ()->Unit, onStart: ()->Unit, onComplete: ()->Unit) {
     var prepared by remember { mutableStateOf( false) }
     AndroidView(
         modifier = Modifier.fillMaxSize(),
@@ -124,9 +125,12 @@ fun VideoPlayer(item: GalleryItem, playState: PlayState, onStart: ()->Unit, onCo
                 setOnCompletionListener {
                     onComplete()
                 }
+                onPreparing()
+//                Log.d("Viewer", "VideoView: factory playState=$playState, isPlaying=$isPlaying")
             }
         },
         update = { videoView ->
+//            Log.d("Viewer", "VideoView: update playState=$playState, isPlaying=${videoView.isPlaying}")
             if (prepared && (playState != PlayState.Pausing)) {
                 videoView.start()
             } else if (videoView.isPlaying && (playState == PlayState.Pausing)) {
