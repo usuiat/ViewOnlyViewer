@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
@@ -30,6 +31,7 @@ import coil.decode.VideoFrameDecoder
 import coil.fetch.VideoFrameFileFetcher
 import coil.fetch.VideoFrameUriFetcher
 import com.google.accompanist.pager.ExperimentalPagerApi
+import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import net.engawapg.app.viewonlyviewer.ui.theme.ViewOnlyViewerTheme
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
@@ -141,6 +143,12 @@ fun GalleryScreen(
     onItemSelected: (Int)->Unit = {},
     onRationaleDialogResult: (Boolean)->Unit
 ) {
+    val systemUiController = rememberSystemUiController()
+    val statusBarColor = MaterialTheme.colorScheme.primaryContainer
+    SideEffect {
+        systemUiController.setStatusBarColor(statusBarColor)
+    }
+
     /* Permissionの取得状況によって表示内容を変える */
     val permissionState: PermissionState by viewModel.permissionState.observeAsState(PermissionState.UNKNOWN)
     val items: List<GalleryItem> by viewModel.galleryItems.observeAsState(listOf())

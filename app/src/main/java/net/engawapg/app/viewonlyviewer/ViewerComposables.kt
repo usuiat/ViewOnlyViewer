@@ -24,11 +24,17 @@ import coil.compose.rememberImagePainter
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.rememberPagerState
+import com.google.accompanist.systemuicontroller.rememberSystemUiController
 
 @ExperimentalCoilApi
 @ExperimentalPagerApi
 @Composable
 fun ViewerScreen(viewModel: MainViewModel, index: Int) {
+    val systemUiController = rememberSystemUiController()
+    SideEffect {
+        systemUiController.setStatusBarColor(Color.Black)
+    }
+
     val items: List<GalleryItem> by viewModel.galleryItems.observeAsState(listOf())
     if (items.isNotEmpty()) {
         Surface(color = Color.Black) {
@@ -148,7 +154,9 @@ fun VideoController(playState: PlayState, onPlayControl: ()->Unit, modifier: Mod
         Icon(
             painter = painterResource(id = iconResId),
             contentDescription = stringResource(id = R.string.desc_playpause),
-            modifier = Modifier.padding(20.dp).clickable { onPlayControl() },
+            modifier = Modifier
+                .padding(20.dp)
+                .clickable { onPlayControl() },
             tint = Color.Unspecified
         )
     }

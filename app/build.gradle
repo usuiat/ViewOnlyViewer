@@ -78,4 +78,7 @@ dependencies {
 
     // Material3
     implementation 'androidx.compose.material3:material3:1.0.0-alpha06'
+
+    // System UI Controller for Jetpack Compose
+    implementation 'com.google.accompanist:accompanist-systemuicontroller:0.20.3'
 }
