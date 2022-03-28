@@ -23,8 +23,7 @@ import coil.compose.rememberImagePainter
 
 private const val COLUMN_NUM = 4
 
-@ExperimentalCoilApi
-@ExperimentalFoundationApi
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun Gallery(items: List<GalleryItem>, onItemSelected: (Int)->Unit = {}) {
     if (items.isNotEmpty()) {
@@ -36,7 +35,7 @@ fun Gallery(items: List<GalleryItem>, onItemSelected: (Int)->Unit = {}) {
     }
 }
 
-@ExperimentalCoilApi
+@OptIn(ExperimentalCoilApi::class)
 @Composable
 fun GalleryItem(item: GalleryItem, onSelected: ()->Unit) {
     Box(

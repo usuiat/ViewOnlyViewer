@@ -26,8 +26,7 @@ import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.rememberPagerState
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 
-@ExperimentalCoilApi
-@ExperimentalPagerApi
+@OptIn(ExperimentalPagerApi::class)
 @Composable
 fun ViewerScreen(viewModel: MainViewModel, index: Int) {
     val systemUiController = rememberSystemUiController()
@@ -71,7 +70,6 @@ enum class PlayState {
     abstract fun toggle(): PlayState
 }
 
-@ExperimentalCoilApi
 @Composable
 fun Viewer(item: GalleryItem, isCurrentPage: Boolean) {
     Box(modifier = Modifier.fillMaxSize()) {
@@ -100,7 +98,7 @@ fun Viewer(item: GalleryItem, isCurrentPage: Boolean) {
     }
 }
 
-@ExperimentalCoilApi
+@OptIn(ExperimentalCoilApi::class)
 @Composable
 fun ImageViewer(item: GalleryItem) {
     Image(

@@ -5,7 +5,6 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -22,15 +21,13 @@ import androidx.core.content.PermissionChecker
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import androidx.navigation.compose.navArgument
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import coil.Coil
 import coil.ImageLoader
-import coil.annotation.ExperimentalCoilApi
 import coil.decode.VideoFrameDecoder
 import coil.fetch.VideoFrameFileFetcher
 import coil.fetch.VideoFrameUriFetcher
-import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import net.engawapg.app.viewonlyviewer.ui.theme.ViewOnlyViewerTheme
 import org.koin.androidx.viewmodel.ext.android.viewModel
@@ -43,9 +40,6 @@ class MainActivity : ComponentActivity() {
 
     private val viewModel: MainViewModel by viewModel()
 
-    @ExperimentalPagerApi
-    @ExperimentalCoilApi
-    @ExperimentalFoundationApi
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         checkPermission()
@@ -111,9 +105,6 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-@ExperimentalPagerApi
-@ExperimentalCoilApi
-@ExperimentalFoundationApi
 @Composable
 fun AppScreen(viewModel: MainViewModel, onRationaleDialogResult: (Boolean) -> Unit) {
     val navController = rememberNavController()
@@ -135,8 +126,6 @@ fun AppScreen(viewModel: MainViewModel, onRationaleDialogResult: (Boolean) -> Un
     }
 }
 
-@ExperimentalCoilApi
-@ExperimentalFoundationApi
 @Composable
 fun GalleryScreen(
     viewModel: MainViewModel,
