@@ -73,12 +73,11 @@ dependencies {
     // Navigation
     implementation 'androidx.navigation:navigation-compose:2.4.1'
 
-    // Pager
+    // Accompanist
     implementation 'com.google.accompanist:accompanist-pager:0.23.1'
+    implementation 'com.google.accompanist:accompanist-systemuicontroller:0.23.1'
+    implementation 'com.google.accompanist:accompanist-permissions:0.23.1'
 
     // Material3
     implementation 'androidx.compose.material3:material3:1.0.0-alpha08'
-
-    // System UI Controller for Jetpack Compose
-    implementation 'com.google.accompanist:accompanist-systemuicontroller:0.23.1'
 }
