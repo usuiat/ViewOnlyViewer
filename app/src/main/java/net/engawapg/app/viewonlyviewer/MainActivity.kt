@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
@@ -17,6 +16,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.core.content.PermissionChecker
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -61,7 +61,11 @@ class MainActivity : ComponentActivity() {
 
     override fun onResume() {
         super.onResume()
-//        viewModel.loadGallery() // TODO
+
+        if (PermissionChecker.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE)
+            == PermissionChecker.PERMISSION_GRANTED) {
+            viewModel.loadGallery()
+        }
     }
 }
 
@@ -102,9 +106,6 @@ fun GalleryScreen(
     when {
         ps.hasPermission -> {
             val items: List<GalleryItem> by viewModel.galleryItems.observeAsState(listOf())
-            LaunchedEffect(ps) {
-                viewModel.loadGallery()
-            }
             Gallery(items, onItemSelected)
         }
 
