@@ -1,6 +1,7 @@
 package net.engawapg.app.viewonlyviewer
 
 import android.media.MediaPlayer
+import android.util.Log
 import android.widget.VideoView
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
@@ -72,29 +73,21 @@ enum class PlayState {
 
 @Composable
 fun Viewer(item: GalleryItem, isCurrentPage: Boolean) {
-    Box(modifier = Modifier.fillMaxSize()) {
-        if (item.isVideo) {
-            var playState by remember { mutableStateOf(PlayState.Preparing) }
+    if (item.isVideo) {
+        Box(modifier = Modifier.fillMaxSize()) {
+            var isVideoRendering by remember { mutableStateOf(false) }
             if (isCurrentPage) {
                 VideoPlayer(
                     item = item,
-                    playState = playState,
-                    onPreparing = { playState = PlayState.Preparing },
-                    onStart = { playState = PlayState.Playing },
-                    onComplete = { playState = PlayState.Pausing }
+                    onVideoRendering = { isVideoRendering = it },
                 )
             }
-            if (!isCurrentPage || (playState == PlayState.Preparing)) {
+            if (!isCurrentPage || !isVideoRendering) {
                 ImageViewer(item)
             }
-            VideoController(
-                playState = playState,
-                onPlayControl = { playState = playState.toggle() },
-                modifier = Modifier.align(Alignment.BottomCenter)
-            )
-        } else {
-            ImageViewer(item)
         }
+    } else {
+        ImageViewer(item)
     }
 }
 
@@ -110,38 +103,44 @@ fun ImageViewer(item: GalleryItem) {
 }
 
 @Composable
-fun VideoPlayer(item: GalleryItem, playState: PlayState, onPreparing: ()->Unit, onStart: ()->Unit, onComplete: ()->Unit) {
-    var prepared by remember { mutableStateOf( false) }
-    AndroidView(
-        modifier = Modifier.fillMaxSize(),
-        factory = { context ->
-            VideoView(context).apply {
-                setVideoURI(item.uri)
-                setOnPreparedListener {
-                    prepared = true
-                }
-                setOnInfoListener { _, what, _ ->
-                    if (what == MediaPlayer.MEDIA_INFO_VIDEO_RENDERING_START) {
-                        onStart()
+fun VideoPlayer(item: GalleryItem, onVideoRendering: (Boolean)->Unit) {
+    var playState by remember { mutableStateOf(PlayState.Preparing) }
+    Box(modifier = Modifier.fillMaxSize()) {
+        AndroidView(
+            modifier = Modifier.fillMaxSize(),
+            factory = { context ->
+                VideoView(context).apply {
+                    setVideoURI(item.uri)
+                    setOnPreparedListener {
+                        playState = PlayState.Playing
+                        Log.d("Viewer", "duration = $duration")
                     }
-                    false
+                    setOnInfoListener { _, what, _ ->
+                        if (what == MediaPlayer.MEDIA_INFO_VIDEO_RENDERING_START) {
+                            onVideoRendering(true)
+                        }
+                        false
+                    }
+                    setOnCompletionListener {
+                        playState = PlayState.Pausing
+                    }
+                    playState = PlayState.Preparing
                 }
-                setOnCompletionListener {
-                    onComplete()
+            },
+            update = { videoView ->
+                if (playState == PlayState.Playing) {
+                    videoView.start()
+                } else if (videoView.isPlaying && (playState == PlayState.Pausing)) {
+                    videoView.pause()
                 }
-                onPreparing()
-//                Log.d("Viewer", "VideoView: factory playState=$playState, isPlaying=$isPlaying")
             }
-        },
-        update = { videoView ->
-//            Log.d("Viewer", "VideoView: update playState=$playState, isPlaying=${videoView.isPlaying}")
-            if (prepared && (playState != PlayState.Pausing)) {
-                videoView.start()
-            } else if (videoView.isPlaying && (playState == PlayState.Pausing)) {
-                videoView.pause()
-            }
-        }
-    )
+        )
+        VideoController(
+            playState = playState,
+            onPlayControl = { playState = playState.toggle() },
+            modifier = Modifier.align(Alignment.BottomCenter)
+        )
+    }
 }
 
 @Composable
