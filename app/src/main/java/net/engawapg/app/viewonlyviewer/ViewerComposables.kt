@@ -1,15 +1,13 @@
 package net.engawapg.app.viewonlyviewer
 
 import android.media.MediaPlayer
-import android.util.Log
 import android.widget.VideoView
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
@@ -26,6 +24,7 @@ import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.rememberPagerState
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
+import kotlinx.coroutines.delay
 
 @OptIn(ExperimentalPagerApi::class)
 @Composable
@@ -105,6 +104,7 @@ fun ImageViewer(item: GalleryItem) {
 @Composable
 fun VideoPlayer(item: GalleryItem, onVideoRendering: (Boolean)->Unit) {
     var playState by remember { mutableStateOf(PlayState.Preparing) }
+    var mediaPlayer: MediaPlayer? by remember { mutableStateOf(null) }
     Box(modifier = Modifier.fillMaxSize()) {
         AndroidView(
             modifier = Modifier.fillMaxSize(),
@@ -113,11 +113,11 @@ fun VideoPlayer(item: GalleryItem, onVideoRendering: (Boolean)->Unit) {
                     setVideoURI(item.uri)
                     setOnPreparedListener {
                         playState = PlayState.Playing
-                        Log.d("Viewer", "duration = $duration")
                     }
-                    setOnInfoListener { _, what, _ ->
+                    setOnInfoListener { mp, what, _ ->
                         if (what == MediaPlayer.MEDIA_INFO_VIDEO_RENDERING_START) {
                             onVideoRendering(true)
+                            mediaPlayer = mp!!
                         }
                         false
                     }
@@ -136,6 +136,7 @@ fun VideoPlayer(item: GalleryItem, onVideoRendering: (Boolean)->Unit) {
             }
         )
         VideoController(
+            mediaPlayer = mediaPlayer,
             playState = playState,
             onPlayControl = { playState = playState.toggle() },
             modifier = Modifier.align(Alignment.BottomCenter)
@@ -144,10 +145,24 @@ fun VideoPlayer(item: GalleryItem, onVideoRendering: (Boolean)->Unit) {
 }
 
 @Composable
-fun VideoController(playState: PlayState, onPlayControl: ()->Unit, modifier: Modifier = Modifier) {
+fun VideoController(
+    mediaPlayer: MediaPlayer?,
+    playState: PlayState,
+    onPlayControl: ()->Unit,
+    modifier: Modifier = Modifier
+) {
     val iconResId = if (playState == PlayState.Playing) R.drawable.pause else R.drawable.play
+    var updateKey by remember { mutableStateOf(0) }
 
-    Box(modifier = modifier) {
+    // Recompose every 100 msec while playing.
+    LaunchedEffect(updateKey, playState) {
+        if (playState == PlayState.Playing) {
+            delay(100)
+            updateKey++
+        }
+    }
+
+    Column(modifier = modifier) {
         Icon(
             painter = painterResource(id = iconResId),
             contentDescription = stringResource(id = R.string.desc_playpause),
@@ -156,5 +171,21 @@ fun VideoController(playState: PlayState, onPlayControl: ()->Unit, modifier: Mod
                 .clickable { onPlayControl() },
             tint = Color.Unspecified
         )
+        Row {
+            val duration = (mediaPlayer?.duration ?: 0) / 1000
+            val durMin = (duration / 60).toString()
+            val durSec = (duration % 60).toString().padStart(2, '0')
+            val curPos = (mediaPlayer?.currentPosition ?: 0) / 1000
+            val curMin = (curPos / 60).toString()
+            val curSec = (curPos % 60).toString().padStart(2, '0')
+            Text ( // Current Position
+                text = "$curMin:$curSec",
+                modifier = Modifier.padding(20.dp)
+            )
+            Text( // Duration
+                text = "$durMin:$durSec",
+                modifier = Modifier.padding(20.dp)
+            )
+        }
     }
 }
