@@ -53,23 +53,6 @@ fun ViewerScreen(viewModel: MainViewModel, index: Int) {
     }
 }
 
-enum class PlayState {
-    Preparing
-    {
-        override fun toggle() = Preparing
-    },
-    Playing
-    {
-        override fun toggle() = Pausing
-    },
-    Pausing
-    {
-        override fun toggle() = Playing
-    };
-
-    abstract fun toggle(): PlayState
-}
-
 @Composable
 fun Viewer(item: GalleryItem, isCurrentPage: Boolean) {
     if (item.isVideo) {
@@ -103,7 +86,6 @@ fun ImageViewer(item: GalleryItem) {
 
 @Composable
 fun VideoPlayer(item: GalleryItem, onVideoRendering: (Boolean)->Unit) {
-    var playState by remember { mutableStateOf(PlayState.Preparing) }
     var mediaPlayer: MediaPlayer? by remember { mutableStateOf(null) }
     Box(modifier = Modifier.fillMaxSize()) {
         AndroidView(
@@ -111,34 +93,21 @@ fun VideoPlayer(item: GalleryItem, onVideoRendering: (Boolean)->Unit) {
             factory = { context ->
                 VideoView(context).apply {
                     setVideoURI(item.uri)
-                    setOnPreparedListener {
-                        playState = PlayState.Playing
+                    setOnPreparedListener { mp ->
+                        mp?.start()
                     }
                     setOnInfoListener { mp, what, _ ->
                         if (what == MediaPlayer.MEDIA_INFO_VIDEO_RENDERING_START) {
                             onVideoRendering(true)
-                            mediaPlayer = mp!!
+                            mediaPlayer = mp ?: null
                         }
                         false
                     }
-                    setOnCompletionListener {
-                        playState = PlayState.Pausing
-                    }
-                    playState = PlayState.Preparing
                 }
             },
-            update = { videoView ->
-                if (playState == PlayState.Playing) {
-                    videoView.start()
-                } else if (videoView.isPlaying && (playState == PlayState.Pausing)) {
-                    videoView.pause()
-                }
-            }
         )
         VideoController(
             mediaPlayer = mediaPlayer,
-            playState = playState,
-            onPlayControl = { playState = playState.toggle() },
             modifier = Modifier.align(Alignment.BottomCenter)
         )
     }
@@ -147,37 +116,36 @@ fun VideoPlayer(item: GalleryItem, onVideoRendering: (Boolean)->Unit) {
 @Composable
 fun VideoController(
     mediaPlayer: MediaPlayer?,
-    playState: PlayState,
-    onPlayControl: ()->Unit,
     modifier: Modifier = Modifier
 ) {
-    val iconResId = if (playState == PlayState.Playing) R.drawable.pause else R.drawable.play
-    var updateKey by remember { mutableStateOf(0) }
+    val isVideoPlaying = mediaPlayer?.isPlaying ?: false
+
+    val duration = (mediaPlayer?.duration ?: 0) / 1000
+    val durMin = (duration / 60).toString()
+    val durSec = (duration % 60).toString().padStart(2, '0')
+    val curPos = (mediaPlayer?.currentPosition ?: 0) / 1000
+    val curMin = (curPos / 60).toString()
+    val curSec = (curPos % 60).toString().padStart(2, '0')
 
     // Recompose every 100 msec while playing.
-    LaunchedEffect(updateKey, playState) {
-        if (playState == PlayState.Playing) {
-            delay(100)
-            updateKey++
-        }
+    var updateKey by remember { mutableStateOf(0) }
+    LaunchedEffect(updateKey) {
+        delay(100)
+        updateKey++
     }
 
     Column(modifier = modifier) {
         Icon(
-            painter = painterResource(id = iconResId),
+            painter = painterResource(if (isVideoPlaying) R.drawable.pause else R.drawable.play),
             contentDescription = stringResource(id = R.string.desc_playpause),
             modifier = Modifier
                 .padding(20.dp)
-                .clickable { onPlayControl() },
+                .clickable {
+                    if (isVideoPlaying) mediaPlayer?.pause() else mediaPlayer?.start()
+                },
             tint = Color.Unspecified
         )
         Row {
-            val duration = (mediaPlayer?.duration ?: 0) / 1000
-            val durMin = (duration / 60).toString()
-            val durSec = (duration % 60).toString().padStart(2, '0')
-            val curPos = (mediaPlayer?.currentPosition ?: 0) / 1000
-            val curMin = (curPos / 60).toString()
-            val curSec = (curPos % 60).toString().padStart(2, '0')
             Text ( // Current Position
                 text = "$curMin:$curSec",
                 modifier = Modifier.padding(20.dp)
