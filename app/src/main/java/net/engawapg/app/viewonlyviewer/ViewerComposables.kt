@@ -36,7 +36,10 @@ fun ViewerScreen(viewModel: MainViewModel, index: Int) {
 
     val items: List<GalleryItem> by viewModel.galleryItems.observeAsState(listOf())
     if (items.isNotEmpty()) {
-        Surface(color = Color.Black) {
+        Surface(
+            color = Color.Black,
+            contentColor = Color.White
+        ) {
             val pagerState = rememberPagerState(initialPage = index)
 
             HorizontalPager(
