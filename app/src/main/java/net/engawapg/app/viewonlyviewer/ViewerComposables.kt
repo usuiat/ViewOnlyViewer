@@ -5,9 +5,7 @@ import android.widget.VideoView
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.material3.Icon
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
+import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
@@ -123,17 +121,17 @@ fun VideoController(
 ) {
     val isVideoPlaying = mediaPlayer?.isPlaying ?: false
 
-    val duration = (mediaPlayer?.duration ?: 0) / 1000
-    val durMin = (duration / 60).toString()
-    val durSec = (duration % 60).toString().padStart(2, '0')
-    val curPos = (mediaPlayer?.currentPosition ?: 0) / 1000
-    val curMin = (curPos / 60).toString()
-    val curSec = (curPos % 60).toString().padStart(2, '0')
+    val duration = (mediaPlayer?.duration ?: 0)
+    val durMin = (duration / 60000).toString()
+    val durSec = ((duration / 1000) % 60000).toString().padStart(2, '0')
+    val curPos = (mediaPlayer?.currentPosition ?: 0)
+    val curMin = (curPos / 60000).toString()
+    val curSec = ((curPos / 1000) % 60).toString().padStart(2, '0')
 
     // Recompose every 100 msec while playing.
     var updateKey by remember { mutableStateOf(0) }
     LaunchedEffect(updateKey) {
-        delay(100)
+        delay(30)
         updateKey++
     }
 
@@ -152,6 +150,19 @@ fun VideoController(
             Text ( // Current Position
                 text = "$curMin:$curSec",
                 modifier = Modifier.padding(20.dp)
+            )
+            Slider(
+                value = curPos.toFloat(),
+                onValueChange = {
+                    mediaPlayer?.pause()
+                    mediaPlayer?.seekTo(it.toInt())
+                },
+                modifier = Modifier
+                    .weight(1f),    // Fill the width left after other components are placed.
+                valueRange = 0f..duration.toFloat(),
+                onValueChangeFinished = {
+                    mediaPlayer?.start()
+                },
             )
             Text( // Duration
                 text = "$durMin:$durSec",
