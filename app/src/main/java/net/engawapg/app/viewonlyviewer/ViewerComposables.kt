@@ -5,7 +5,10 @@ import android.widget.VideoView
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.material3.*
+import androidx.compose.material3.Icon
+import androidx.compose.material3.Slider
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
@@ -96,11 +99,11 @@ fun VideoPlayer(item: GalleryItem, onVideoRendering: (Boolean)->Unit) {
                     setVideoURI(item.uri)
                     setOnPreparedListener { mp ->
                         mp?.start()
+                        mediaPlayer = mp ?: null
                     }
-                    setOnInfoListener { mp, what, _ ->
+                    setOnInfoListener { _, what, _ ->
                         if (what == MediaPlayer.MEDIA_INFO_VIDEO_RENDERING_START) {
                             onVideoRendering(true)
-                            mediaPlayer = mp ?: null
                         }
                         false
                     }
@@ -119,12 +122,19 @@ fun VideoController(
     mediaPlayer: MediaPlayer?,
     modifier: Modifier = Modifier
 ) {
-    val isVideoPlaying = mediaPlayer?.isPlaying ?: false
+    var isVideoPlaying = false
+    var duration = 0
+    var curPos = 0
+    try {
+        isVideoPlaying = mediaPlayer?.isPlaying ?: false
+        duration = (mediaPlayer?.duration ?: 0)
+        curPos = (mediaPlayer?.currentPosition ?: 0)
+    } catch (e: IllegalStateException) {
+        // Nothing to do until the MediaPlayer will be prepared.
+    }
 
-    val duration = (mediaPlayer?.duration ?: 0)
     val durMin = (duration / 60000).toString()
     val durSec = ((duration / 1000) % 60000).toString().padStart(2, '0')
-    val curPos = (mediaPlayer?.currentPosition ?: 0)
     val curMin = (curPos / 60000).toString()
     val curSec = ((curPos / 1000) % 60).toString().padStart(2, '0')
 
