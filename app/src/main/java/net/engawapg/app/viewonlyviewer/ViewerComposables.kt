@@ -3,6 +3,7 @@ package net.engawapg.app.viewonlyviewer
 import android.media.MediaPlayer
 import android.widget.VideoView
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.Icon
@@ -13,6 +14,7 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
@@ -145,7 +147,11 @@ fun VideoController(
         updateKey++
     }
 
-    Column(modifier = modifier) {
+    Column(
+        modifier = modifier
+            .background(Brush.verticalGradient(listOf(Color.Transparent, Color(0x80000000)))),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
         Icon(
             painter = painterResource(if (isVideoPlaying) R.drawable.pause else R.drawable.play),
             contentDescription = stringResource(id = R.string.desc_playpause),
@@ -156,7 +162,9 @@ fun VideoController(
                 },
             tint = Color.Unspecified
         )
-        Row {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
             Text ( // Current Position
                 text = "$curMin:$curSec",
                 modifier = Modifier.padding(20.dp)
