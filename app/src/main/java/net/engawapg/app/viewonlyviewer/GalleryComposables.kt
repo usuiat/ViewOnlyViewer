@@ -3,6 +3,7 @@ package net.engawapg.app.viewonlyviewer
 import android.Manifest
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.GridCells
@@ -110,7 +111,9 @@ fun GalleryItem(item: GalleryItem, onSelected: ()->Unit) {
             model = item.uri,
             contentDescription = "Image",
             contentScale = ContentScale.Crop,
-            colorFilter = filter
+            colorFilter = filter,
+            modifier = Modifier
+                .background(MaterialTheme.colorScheme.surfaceVariant),
         )
 
         if (item.isVideo) {
