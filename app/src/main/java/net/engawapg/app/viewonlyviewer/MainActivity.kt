@@ -13,11 +13,6 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import coil.Coil
-import coil.ImageLoader
-import coil.decode.VideoFrameDecoder
-import coil.fetch.VideoFrameFileFetcher
-import coil.fetch.VideoFrameUriFetcher
 import net.engawapg.app.viewonlyviewer.ui.theme.ViewOnlyViewerTheme
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
@@ -28,15 +23,6 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val imageLoader = ImageLoader.Builder(this)
-            .componentRegistry {
-                add(VideoFrameFileFetcher(this@MainActivity))
-                add(VideoFrameUriFetcher(this@MainActivity))
-                add(VideoFrameDecoder(this@MainActivity))
-            }
-            .crossfade(true)
-            .build()
-        Coil.setImageLoader(imageLoader)
 
         setContent {
             ViewOnlyViewerTheme {
