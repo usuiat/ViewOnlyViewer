@@ -5,7 +5,9 @@ import android.content.Context
 import android.net.Uri
 import android.provider.MediaStore
 import android.util.Log
+import androidx.compose.runtime.Stable
 
+@Stable
 data class GalleryItem(val uri: Uri, val isVideo: Boolean)
 
 class GalleryModel {
