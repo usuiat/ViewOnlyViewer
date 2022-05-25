@@ -6,4 +6,5 @@
     <string name="cancel">キャンセル</string>
     <string name="request_to_grant_permission">アプリが写真や動画を表示できるように、設定アプリでストレージへのアクセスを許可してください。</string>
     <string name="desc_playpause">ビデオを再生・一時停止するボタン</string>
+    <string name="desc_settings">設定</string>
 </resources>
