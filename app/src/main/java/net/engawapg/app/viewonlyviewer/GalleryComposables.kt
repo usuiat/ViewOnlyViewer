@@ -25,6 +25,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -40,8 +41,8 @@ private const val COLUMN_NUM = 4
 
 /* Tap count to invoke button actions. e.g. moving to setting screen. */
 private const val TAP_COUNT_TO_BUTTON_ACTION = 3
-/* Time out (msec) to cancel invoking button actions. */
-private const val TIMEOUT_TO_CANCEL_ACTION = 700L
+/* Time out (msec) to cancel invoking button actions for each tap. */
+private const val TIMEOUT_TO_CANCEL_ACTION_PER_TAP = 300L
 
 @OptIn(ExperimentalPermissionsApi::class, ExperimentalMaterial3Api::class)
 @Composable
@@ -58,15 +59,30 @@ fun GalleryScreen(
         systemUiController.setStatusBarColor(statusBarColor)
     }
 
+    val snackbarHostState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
+    val failedMessage = LocalContext.current.getString(
+        R.string.message_when_opening_settings_failed,
+        TAP_COUNT_TO_BUTTON_ACTION
+    )
+
     Scaffold(
+        snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
             CenterAlignedTopAppBar(
                 title = { Text(stringResource(R.string.app_name)) },
                 actions = {
-                     TripleTapIconButton(
+                     MultiTapIconButton(
+                         tapCount = TAP_COUNT_TO_BUTTON_ACTION,
                          onTapComplete = { success ->
-                             Log.d("GalleryComposables", "onTapComplete $success")
+                             if (success) {
+                                 Log.d("GalleryComposables", "onTapComplete $success")
+                             } else {
+                                 scope.launch {
+                                     snackbarHostState.showSnackbar(failedMessage)
+                                 }
+                             }
                          }
                      ) {
                          Icon(
@@ -101,24 +117,28 @@ fun GalleryScreen(
 }
 
 @Composable
-fun TripleTapIconButton(onTapComplete: (Boolean)->Unit, content: @Composable ()->Unit) {
+fun MultiTapIconButton(
+    tapCount: Int,
+    onTapComplete: (Boolean)->Unit,
+    content: @Composable ()->Unit
+) {
     val scope = rememberCoroutineScope()
     var job: Job? = remember{ null }
-    var tapCount = remember { 0 }
+    var count = remember { 0 }
     IconButton(
         onClick = {
-            if (tapCount == 0) {
+            if (count == 0) {
                 job = scope.launch {
-                    delay(TIMEOUT_TO_CANCEL_ACTION)
+                    delay(TIMEOUT_TO_CANCEL_ACTION_PER_TAP * tapCount)
                     onTapComplete(false)
-                    tapCount = 0
+                    count = 0
                 }
             }
-            tapCount++
-            if (tapCount >= TAP_COUNT_TO_BUTTON_ACTION) {
+            count++
+            if (count >= tapCount) {
                 job?.cancel()
                 onTapComplete(true)
-                tapCount = 0
+                count = 0
             }
         },
         content = content
