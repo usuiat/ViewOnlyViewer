@@ -50,7 +50,13 @@ fun AppScreen(viewModel: MainViewModel) {
         composable("gallery") {
             GalleryScreen(
                 viewModel = viewModel,
-                onItemSelected = { index -> navController.navigate("viewer/$index") }
+                onItemSelected = { index -> navController.navigate("viewer/$index") },
+                onEvent = { event ->
+                    when(event) {
+                        GalleryScreenEvent.SelectSettings ->
+                            navController.navigate("settings")
+                    }
+                }
             )
         }
         composable(
@@ -59,6 +65,9 @@ fun AppScreen(viewModel: MainViewModel) {
         ) { backStackEntry ->
             val index = backStackEntry.arguments?.getInt("index") ?: 0
             ViewerScreen(viewModel = viewModel, index = index)
+        }
+        composable("settings") {
+            SettingsScreen()
         }
     }
 }

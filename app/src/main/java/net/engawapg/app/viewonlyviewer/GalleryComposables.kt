@@ -1,7 +1,6 @@
 package net.engawapg.app.viewonlyviewer
 
 import android.Manifest
-import android.util.Log
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -37,6 +36,10 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
+enum class GalleryScreenEvent {
+    SelectSettings
+}
+
 private const val COLUMN_NUM = 4
 
 /* Tap count to invoke button actions. e.g. moving to setting screen. */
@@ -48,7 +51,8 @@ private const val TIMEOUT_TO_CANCEL_ACTION_PER_TAP = 300L
 @Composable
 fun GalleryScreen(
     viewModel: MainViewModel,
-    onItemSelected: (Int)->Unit = {}
+    onItemSelected: (Int)->Unit = {},
+    onEvent: (GalleryScreenEvent)->Unit = {},
 ) {
     val scrollBehavior = remember {TopAppBarDefaults.enterAlwaysScrollBehavior()}
     val statusBarColor = TopAppBarDefaults.centerAlignedTopAppBarColors()
@@ -77,7 +81,7 @@ fun GalleryScreen(
                          tapCount = TAP_COUNT_TO_BUTTON_ACTION,
                          onTapComplete = { success ->
                              if (success) {
-                                 Log.d("GalleryComposables", "onTapComplete $success")
+                                 onEvent(GalleryScreenEvent.SelectSettings)
                              } else {
                                  scope.launch {
                                      snackbarHostState.showSnackbar(failedMessage)
