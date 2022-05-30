@@ -67,7 +67,13 @@ fun AppScreen(viewModel: MainViewModel) {
             ViewerScreen(viewModel = viewModel, index = index)
         }
         composable("settings") {
-            SettingsScreen()
+            SettingsScreen(
+                onEvent = { event ->
+                    when(event) {
+                        SettingsScreenEvent.SelectBack -> navController.navigateUp()
+                    }
+                }
+            )
         }
     }
 }

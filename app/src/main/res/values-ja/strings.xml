@@ -8,4 +8,6 @@
     <string name="desc_playpause">ビデオを再生・一時停止するボタン</string>
     <string name="desc_settings">設定</string>
     <string name="message_when_opening_settings_failed">設定を開くには素早く%1$d回タップしてください。</string>
+    <string name="settings">設定</string>
+    <string name="desc_back">戻る</string>
 </resources>
