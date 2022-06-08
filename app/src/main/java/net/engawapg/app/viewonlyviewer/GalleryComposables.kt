@@ -42,8 +42,6 @@ enum class GalleryScreenEvent {
 
 private const val COLUMN_NUM = 4
 
-/* Tap count to invoke button actions. e.g. moving to setting screen. */
-private const val TAP_COUNT_TO_BUTTON_ACTION = 3
 /* Time out (msec) to cancel invoking button actions for each tap. */
 private const val TIMEOUT_TO_CANCEL_ACTION_PER_TAP = 300L
 
@@ -65,9 +63,10 @@ fun GalleryScreen(
 
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
+    val tapCount = SettingTapCountToOpenSettings.getState(LocalContext.current)
     val failedMessage = LocalContext.current.getString(
         R.string.message_when_opening_settings_failed,
-        TAP_COUNT_TO_BUTTON_ACTION
+        tapCount.value
     )
 
     Scaffold(
@@ -78,7 +77,7 @@ fun GalleryScreen(
                 title = { Text(stringResource(R.string.app_name)) },
                 actions = {
                      MultiTapIconButton(
-                         tapCount = TAP_COUNT_TO_BUTTON_ACTION,
+                         tapCount = tapCount.value,
                          onTapComplete = { success ->
                              if (success) {
                                  onEvent(GalleryScreenEvent.SelectSettings)

@@ -10,4 +10,12 @@
     <string name="message_when_opening_settings_failed">設定を開くには素早く%1$d回タップしてください。</string>
     <string name="settings">設定</string>
     <string name="desc_back">戻る</string>
+    <string name="setting_title_tap_count_to_open_settings">複数回タップして設定画面を開く</string>
+    <string name="setting_header_childproof">チャイルドロック</string>
+    <string name="setting_desc_tap_count_to_open_settings">設定画面を開くために必要な設定ボタンのタップ回数を選びます。</string>
+    <string name="setting_value_tap_count_to_open_settings_1">OFF (シングルタップ)</string>
+    <string name="setting_value_tap_count_to_open_settings_2">2 (ダブルタップ)</string>
+    <string name="setting_value_tap_count_to_open_settings_3">3 (トリプルタップ)</string>
+    <string name="setting_value_tap_count_to_open_settings_4">4回</string>
+    <string name="setting_value_tap_count_to_open_settings_5">5回</string>
 </resources>

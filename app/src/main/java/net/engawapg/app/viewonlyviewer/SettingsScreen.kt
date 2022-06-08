@@ -1,40 +1,31 @@
 package net.engawapg.app.viewonlyviewer
 
-import android.content.res.Configuration
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.SideEffect
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.DialogProperties
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
-import net.engawapg.app.viewonlyviewer.ui.theme.ViewOnlyViewerTheme
+import kotlinx.coroutines.launch
 
 enum class SettingsScreenEvent {
     SelectBack
 }
 
-val groupedSettingKeys = listOf(
-    "Category1" to listOf("TapCountToOpenSettings", "Test", "Test"),
-    "Category2" to listOf("Test", "Test", "Test", "Test"),
-)
-val settingMap = mutableMapOf<String, Any>(
-    "TapCountToOpenSettings" to 3,
-    "Test" to "TestValue",
-)
-
 internal object SettingsScreenTokens {
-//    val ItemKeyStyle = MaterialTheme.typography.titleLarge
     val ItemPaddingStart = 20.dp
     val ItemPaddingVertical = 8.dp
     val HeaderPaddingTop = 28.dp
@@ -71,26 +62,18 @@ fun SettingsScreen(onEvent: (SettingsScreenEvent)->Unit = {}) {
             )
         }
     ) {
-        SettingsList(groupedSettingKeys)
+        SettingsList()
     }
 }
 
 @Composable
-fun SettingsList(groupedKeys: List<Pair<String, List<String>>>) {
+fun SettingsList() {
     LazyColumn(
         modifier = Modifier.fillMaxWidth()
     ) {
-        for (group in groupedKeys) {
-            item {
-                SettingsHeader(group.first)
-            }
-            items(group.second) { key ->
-                when (val value = settingMap[key]) {
-                    null -> Unit
-                    is Boolean -> Unit
-                    else -> SettingItemCell(key = key, value)
-                }
-            }
+        item {
+            SettingsHeader(title = stringResource(id = R.string.setting_header_childproof))
+            SettingCellTapCountToOpenSettings()
         }
     }
 }
@@ -115,10 +98,51 @@ fun SettingsHeader(title: String) {
 }
 
 @Composable
-fun SettingItemCell(key: String, value: Any) {
+fun SettingCellTapCountToOpenSettings() {
+    val context = LocalContext.current
+    val tapCount = SettingTapCountToOpenSettings.getState(context)
+    val scope = rememberCoroutineScope()
+    var showDialog by remember { mutableStateOf(false) }
+
+    val options = listOf(
+        stringResource(id = R.string.setting_value_tap_count_to_open_settings_1),
+        stringResource(id = R.string.setting_value_tap_count_to_open_settings_2),
+        stringResource(id = R.string.setting_value_tap_count_to_open_settings_3),
+        stringResource(id = R.string.setting_value_tap_count_to_open_settings_4),
+        stringResource(id = R.string.setting_value_tap_count_to_open_settings_5),
+    )
+
+    SettingItemCell(
+        title = stringResource(id = R.string.setting_title_tap_count_to_open_settings),
+        value = options[tapCount.value - 1],
+        onClick = { showDialog = true }
+    )
+
+    if (showDialog) {
+        RadioButtonDialog(
+            title = stringResource(id = R.string.setting_title_tap_count_to_open_settings),
+            text = stringResource(id = R.string.setting_desc_tap_count_to_open_settings),
+            options = options,
+            selected = tapCount.value - 1,
+            onSelect = { selected ->
+                scope.launch { SettingTapCountToOpenSettings.set(selected + 1, context) }
+                showDialog = false
+            },
+        )
+    }
+}
+
+@Composable
+fun SettingItemCell(
+    title: String,
+    value: String,
+    onClick: ()->Unit = {}
+) {
     Surface(
         color = MaterialTheme.colorScheme.surface,
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick),
     ) {
         Column(
             modifier = Modifier.padding(
@@ -127,11 +151,11 @@ fun SettingItemCell(key: String, value: Any) {
             )
         ) {
             Text(
-                text = key,
+                text = title,
                 style = MaterialTheme.typography.titleLarge,
             )
             Text(
-                text = value.toString(),
+                text = value,
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onPrimaryContainer,
             )
@@ -139,25 +163,58 @@ fun SettingItemCell(key: String, value: Any) {
     }
 }
 
-@Preview(
-    name = "Light",
-    showBackground = true,
-    uiMode = Configuration.UI_MODE_NIGHT_NO,
-    widthDp = 360,
-    heightDp = 200,
-)
-@Preview(
-    name = "Dark",
-    showBackground = true,
-    uiMode = Configuration.UI_MODE_NIGHT_YES,
-    widthDp = 360,
-    heightDp = 200,
-)
+@OptIn(ExperimentalComposeUiApi::class, ExperimentalMaterial3Api::class)
 @Composable
-fun SettingPreview() {
-    ViewOnlyViewerTheme {
-        Surface(color = MaterialTheme.colorScheme.background) {
-            SettingsList(groupedSettingKeys)
-        }
-    }
+fun RadioButtonDialog(
+    title: String,
+    text: String,
+    options: List<String>,
+    selected: Int,
+    onSelect:(Int)->Unit,
+) {
+    AlertDialog(
+        onDismissRequest = { onSelect(selected) }, // No change
+        confirmButton = {},
+        modifier = Modifier
+            .fillMaxWidth(0.9f),
+        title = {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.titleLarge,
+            )
+        },
+        text = {
+            Column(Modifier.selectableGroup()) {
+                Text(
+                    text = text,
+                )
+                options.forEachIndexed { index, option ->
+                    Row(
+                        Modifier
+                            .fillMaxWidth()
+                            .height(56.dp)
+                            .selectable(
+                                selected = (index == selected),
+                                onClick = {
+                                    onSelect(index)
+                                },
+                                role = Role.RadioButton
+                            ),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        RadioButton(
+                            selected = (index == selected),
+                            onClick = null
+                        )
+                        Text(
+                            text = option,
+                            style = MaterialTheme.typography.titleMedium,
+                            modifier = Modifier.padding(start = 16.dp)
+                        )
+                    }
+                }
+            }
+        },
+        properties = DialogProperties(usePlatformDefaultWidth = false)
+    )
 }
