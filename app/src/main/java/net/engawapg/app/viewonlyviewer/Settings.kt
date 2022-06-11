@@ -18,6 +18,10 @@ val SettingTapCountToOpenSettings = SettingDefinition(
     intPreferencesKey("TapCountToOpenSettings"), 1
 )
 
+val SettingMultiGoBack = SettingDefinition(
+    intPreferencesKey("MultiGoBack"), 1
+)
+
 class SettingDefinition<T>(private val key: Preferences.Key<T>, private val default: T) {
     @Composable
     fun getState(context: Context): State<T> =

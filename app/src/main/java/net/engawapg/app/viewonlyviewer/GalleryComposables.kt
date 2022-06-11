@@ -1,6 +1,7 @@
 package net.engawapg.app.viewonlyviewer
 
 import android.Manifest
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -25,9 +26,12 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
 import coil.compose.AsyncImage
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberPermissionState
@@ -44,6 +48,8 @@ private const val COLUMN_NUM = 4
 
 /* Time out (msec) to cancel invoking button actions for each tap. */
 private const val TIMEOUT_TO_CANCEL_ACTION_PER_TAP = 300L
+/* Time out (msec) to cancel invoking go back actions for each operation. */
+private const val TIMEOUT_TO_CANCEL_ACTION_PER_BACK = 500L
 
 @OptIn(ExperimentalPermissionsApi::class, ExperimentalMaterial3Api::class)
 @Composable
@@ -64,10 +70,9 @@ fun GalleryScreen(
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
     val tapCount = SettingTapCountToOpenSettings.getState(LocalContext.current)
-    val failedMessage = LocalContext.current.getString(
-        R.string.message_when_opening_settings_failed,
-        tapCount.value
-    )
+    val backCount = SettingMultiGoBack.getState(LocalContext.current)
+    val failedMessage = stringResource(R.string.message_when_opening_settings_failed, tapCount.value)
+    val cancelGoBackMsg = stringResource(R.string.message_when_go_back_canceled, backCount.value)
 
     Scaffold(
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
@@ -115,6 +120,13 @@ fun GalleryScreen(
             else -> SideEffect {
                 ps.launchPermissionRequest()
             }
+        }
+    }
+
+    // Multiple go back operation to exit app.
+    MultiGoBackHandler(backCount.value) {
+        scope.launch {
+            snackbarHostState.showSnackbar(cancelGoBackMsg)
         }
     }
 }
@@ -221,4 +233,51 @@ fun PermissionRationaleDialog(onDialogResult: ()->Unit) {
             }
         },
     )
+}
+
+/**
+ * GoBackHandler that invoke go back action when multiple go back operations are performed.
+ */
+@Composable
+fun MultiGoBackHandler(requiredCount: Int, onCancel: ()->Unit) {
+    if (requiredCount > 1) {
+        val scope = rememberCoroutineScope()
+        var job by remember<MutableState<Job?>> { mutableStateOf(null) }
+        var count = remember { 0 }
+        var enableHandler by remember { mutableStateOf(true) }
+        val lifecycleOwner = LocalLifecycleOwner.current
+
+        BackHandler(enableHandler) {
+            count++
+            if (count == 1) {
+                // At first onBack, start timer.
+                job = scope.launch {
+                    delay(TIMEOUT_TO_CANCEL_ACTION_PER_BACK * requiredCount)
+                    // Reset counter and enable BackHandler
+                    count = 0
+                    enableHandler = true
+                    onCancel()
+                }
+            }
+            if (count == (requiredCount - 1)) {
+                // Disable this BackHandler to exit app in the next go back operation.
+                enableHandler = false
+            }
+        }
+
+        // Detect the final go back operation and cancel the timer.
+        DisposableEffect(true) {
+            val observer = LifecycleEventObserver { _, event ->
+                if (event == Lifecycle.Event.ON_PAUSE) {
+                    job?.cancel()
+                    count = 0
+                    enableHandler = true
+                }
+            }
+            lifecycleOwner.lifecycle.addObserver(observer)
+            onDispose {
+                lifecycleOwner.lifecycle.removeObserver(observer)
+            }
+        }
+    }
 }

@@ -18,4 +18,12 @@
     <string name="setting_value_tap_count_to_open_settings_3">3 (トリプルタップ)</string>
     <string name="setting_value_tap_count_to_open_settings_4">4回</string>
     <string name="setting_value_tap_count_to_open_settings_5">5回</string>
+    <string name="setting_title_multi_go_back">複数回の戻る操作で終了する</string>
+    <string name="setting_desc_multi_go_back">アプリを終了するために必要な戻る操作の回数を選びます。</string>
+    <string name="setting_value_multi_go_back_1">OFF (1回)</string>
+    <string name="setting_value_multi_go_back_2">2回</string>
+    <string name="setting_value_multi_go_back_3">3回</string>
+    <string name="setting_value_multi_go_back_4">4回</string>
+    <string name="setting_value_multi_go_back_5">5回</string>
+    <string name="message_when_go_back_canceled">アプリを終了するには戻る操作を素早く%1$d回行ってください。</string>
 </resources>

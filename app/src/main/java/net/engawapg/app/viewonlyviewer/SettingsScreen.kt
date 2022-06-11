@@ -74,6 +74,7 @@ fun SettingsList() {
         item {
             SettingsHeader(title = stringResource(id = R.string.setting_header_childproof))
             SettingCellTapCountToOpenSettings()
+            SettingCellMultiGoBack()
         }
     }
 }
@@ -128,6 +129,41 @@ fun SettingCellTapCountToOpenSettings() {
                 scope.launch { SettingTapCountToOpenSettings.set(selected + 1, context) }
                 showDialog = false
             },
+        )
+    }
+}
+
+@Composable
+fun SettingCellMultiGoBack() {
+    val context = LocalContext.current
+    val num = SettingMultiGoBack.getState(context)
+    var showDialog by remember { mutableStateOf(false) }
+    val scope = rememberCoroutineScope()
+
+    val options = listOf(
+        stringResource(id = R.string.setting_value_multi_go_back_1),
+        stringResource(id = R.string.setting_value_multi_go_back_2),
+        stringResource(id = R.string.setting_value_multi_go_back_3),
+        stringResource(id = R.string.setting_value_multi_go_back_4),
+        stringResource(id = R.string.setting_value_multi_go_back_5),
+    )
+
+    SettingItemCell(
+        title = stringResource(id = R.string.setting_title_multi_go_back),
+        value = options[num.value - 1],
+        onClick = { showDialog = true}
+    )
+
+    if (showDialog) {
+        RadioButtonDialog(
+            title = stringResource(id = R.string.setting_title_multi_go_back),
+            text = stringResource(id = R.string.setting_desc_multi_go_back),
+            options = options,
+            selected = num.value - 1,
+            onSelect = { selected ->
+                scope.launch { SettingMultiGoBack.set(selected + 1, context) }
+                showDialog = false
+            }
         )
     }
 }
