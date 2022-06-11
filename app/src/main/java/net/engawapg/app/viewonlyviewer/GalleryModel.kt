@@ -4,7 +4,6 @@ import android.content.ContentUris
 import android.content.Context
 import android.net.Uri
 import android.provider.MediaStore
-import android.util.Log
 import androidx.compose.runtime.Stable
 
 @Stable
@@ -48,7 +47,7 @@ class GalleryModel {
                 val isVideo = (mediaType == MediaStore.Files.FileColumns.MEDIA_TYPE_VIDEO)
 
                 list.add(GalleryItem(uri, isVideo))
-                Log.d("GalleryModel", "$uri $isVideo")
+//                Log.d("GalleryModel", "$uri $isVideo")
             }
         }
 
