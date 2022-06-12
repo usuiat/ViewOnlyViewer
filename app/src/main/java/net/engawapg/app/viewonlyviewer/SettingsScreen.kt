@@ -16,6 +16,7 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
@@ -27,8 +28,8 @@ enum class SettingsScreenEvent {
 
 internal object SettingsScreenTokens {
     val ItemPaddingStart = 20.dp
-    val ItemPaddingVertical = 8.dp
-    val HeaderPaddingTop = 28.dp
+    val ItemPaddingVertical = 16.dp
+    val HeaderPaddingTop = 36.dp
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -77,25 +78,6 @@ fun SettingsList() {
 
         item { SettingsHeader(title = stringResource(id = R.string.setting_header_about)) }
         item { SettingCellVersion() }
-    }
-}
-
-@Composable
-fun SettingsHeader(title: String) {
-    Surface(
-        color = MaterialTheme.colorScheme.surface,
-        modifier = Modifier
-            .padding(
-                start = SettingsScreenTokens.ItemPaddingStart,
-                top = SettingsScreenTokens.HeaderPaddingTop,
-                bottom = SettingsScreenTokens.ItemPaddingVertical
-            )
-    ) {
-        Text(
-            text = title,
-            style = MaterialTheme.typography.titleMedium,
-            color = MaterialTheme.colorScheme.primary,
-        )
     }
 }
 
@@ -178,6 +160,27 @@ fun SettingCellVersion() {
 }
 
 @Composable
+fun SettingsHeader(title: String) {
+    Surface(
+        color = MaterialTheme.colorScheme.surface,
+    ) {
+        Box(
+            modifier = Modifier
+                .padding(
+                    start = SettingsScreenTokens.ItemPaddingStart,
+                    top = SettingsScreenTokens.HeaderPaddingTop,
+                ),
+        ) {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.titleLarge,
+                color = MaterialTheme.colorScheme.tertiary,
+            )
+        }
+    }
+}
+
+@Composable
 fun SettingItemCell(
     title: String,
     value: String,
@@ -189,20 +192,27 @@ fun SettingItemCell(
             .fillMaxWidth()
             .clickable(onClick = onClick),
     ) {
-        Column(
-            modifier = Modifier.padding(
-                SettingsScreenTokens.ItemPaddingStart,
-                SettingsScreenTokens.ItemPaddingVertical
-            )
-        ) {
+        Column {
             Text(
                 text = title,
-                style = MaterialTheme.typography.titleLarge,
+                style = MaterialTheme.typography.titleMedium,
+                modifier = Modifier.padding(
+                    start = SettingsScreenTokens.ItemPaddingStart,
+                    top = SettingsScreenTokens.ItemPaddingVertical,
+                )
             )
             Text(
                 text = value,
-                style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onPrimaryContainer,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.outline,
+                modifier = Modifier.padding(
+                    start = SettingsScreenTokens.ItemPaddingStart,
+                    bottom = SettingsScreenTokens.ItemPaddingVertical,
+                )
+            )
+            Divider(
+                color = MaterialTheme.colorScheme.outline,
+                thickness = Dp.Hairline,
             )
         }
     }
