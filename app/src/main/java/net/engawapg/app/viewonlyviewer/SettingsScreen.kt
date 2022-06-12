@@ -71,11 +71,12 @@ fun SettingsList() {
     LazyColumn(
         modifier = Modifier.fillMaxWidth()
     ) {
-        item {
-            SettingsHeader(title = stringResource(id = R.string.setting_header_childproof))
-            SettingCellTapCountToOpenSettings()
-            SettingCellMultiGoBack()
-        }
+        item { SettingsHeader(title = stringResource(id = R.string.setting_header_childproof)) }
+        item { SettingCellTapCountToOpenSettings() }
+        item { SettingCellMultiGoBack() }
+
+        item { SettingsHeader(title = stringResource(id = R.string.setting_header_about)) }
+        item { SettingCellVersion() }
     }
 }
 
@@ -166,6 +167,14 @@ fun SettingCellMultiGoBack() {
             }
         )
     }
+}
+
+@Composable
+fun SettingCellVersion() {
+    SettingItemCell(
+        title = stringResource(id = R.string.setting_title_version),
+        value = BuildConfig.VERSION_NAME
+    )
 }
 
 @Composable

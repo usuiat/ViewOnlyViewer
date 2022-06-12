@@ -25,4 +25,6 @@
     <string name="setting_value_multi_go_back_4">4 times</string>
     <string name="setting_value_multi_go_back_5">5 times</string>
     <string name="message_when_go_back_canceled">Perform back operation %1$d times quickly to exit the app.</string>
+    <string name="setting_header_about">About this app</string>
+    <string name="setting_title_version">Version</string>
 </resources>
