@@ -155,7 +155,8 @@ fun SettingCellMultiGoBack() {
 fun SettingCellVersion() {
     SettingItemCell(
         title = stringResource(id = R.string.setting_title_version),
-        value = BuildConfig.VERSION_NAME
+        value = BuildConfig.VERSION_NAME,
+        enableClick = false,
     )
 }
 
@@ -184,13 +185,14 @@ fun SettingsHeader(title: String) {
 fun SettingItemCell(
     title: String,
     value: String,
+    enableClick: Boolean = true,
     onClick: ()->Unit = {}
 ) {
     Surface(
         color = MaterialTheme.colorScheme.surface,
         modifier = Modifier
             .fillMaxWidth()
-            .clickable(onClick = onClick),
+            .clickable(enabled = enableClick, onClick = onClick),
     ) {
         Column {
             Text(
