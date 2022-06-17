@@ -1,5 +1,6 @@
 package net.engawapg.app.viewonlyviewer
 
+import android.os.Build
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -80,6 +81,9 @@ fun SettingsList() {
 
         item { SettingsHeader(title = stringResource(id = R.string.setting_header_theme)) }
         item { SettingCellDarkTheme() }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            item { SettingCellColorTheme() }
+        }
 
         item { SettingsHeader(title = stringResource(id = R.string.setting_header_about)) }
         item { SettingCellVersion() }
@@ -182,6 +186,37 @@ fun SettingCellDarkTheme() {
             selected = current.value,
             onSelect = { selected ->
                 scope.launch { SettingDarkTheme.set(selected, context) }
+                showDialog = false
+            }
+        )
+    }
+}
+
+@Composable
+fun SettingCellColorTheme() {
+    val context = LocalContext.current
+    val current = SettingColorTheme.getState(context)
+    var showDialog by remember { mutableStateOf(false) }
+    val scope = rememberCoroutineScope()
+
+    val options = listOf(
+        stringResource(id = R.string.setting_value_app_colors),
+        stringResource(id = R.string.setting_value_use_wallpaper_colors),
+    )
+
+    SettingItemCell(
+        title = stringResource(id = R.string.setting_title_colortheme),
+        value = options[current.value],
+        modifier = Modifier.clickable { showDialog = true },
+    )
+
+    if (showDialog) {
+        RadioButtonDialog(
+            title = stringResource(id = R.string.setting_title_colortheme),
+            options = options,
+            selected = current.value,
+            onSelect = { selected ->
+                scope.launch { SettingColorTheme.set(selected, context) }
                 showDialog = false
             }
         )

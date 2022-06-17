@@ -33,4 +33,7 @@
     <string name="setting_value_on">オン</string>
     <string name="setting_value_off">オフ</string>
     <string name="setting_value_use_system_settings">システム設定を使う</string>
+    <string name="setting_title_colortheme">カラーテーマ</string>
+    <string name="setting_value_app_colors">アプリのテーマカラー</string>
+    <string name="setting_value_use_wallpaper_colors">壁紙の色</string>
 </resources>

@@ -32,4 +32,7 @@
     <string name="setting_value_on">On</string>
     <string name="setting_value_off">Off</string>
     <string name="setting_value_use_system_settings">Use system settings</string>
+    <string name="setting_title_colortheme">Color theme</string>
+    <string name="setting_value_app_colors">Use app theme colors</string>
+    <string name="setting_value_use_wallpaper_colors">Use wallpaper colors</string>
 </resources>

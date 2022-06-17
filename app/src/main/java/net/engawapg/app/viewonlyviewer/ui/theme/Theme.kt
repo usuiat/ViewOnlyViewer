@@ -67,9 +67,10 @@ private val DarkThemeColors = darkColorScheme(
 @Composable
 fun ViewOnlyViewerTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
+    dynamicColor: Boolean = true,
     content: @Composable () -> Unit
 ) {
-    val dynamicColorAvailable = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
+    val dynamicColorAvailable = (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) and dynamicColor
     val colors = when {
         dynamicColorAvailable && darkTheme -> dynamicDarkColorScheme(LocalContext.current)
         dynamicColorAvailable && !darkTheme -> dynamicLightColorScheme(LocalContext.current)

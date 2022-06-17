@@ -32,7 +32,9 @@ class MainActivity : ComponentActivity() {
                 DarkThemeValue.On -> true
                 else -> isSystemInDarkTheme()
             }
-            ViewOnlyViewerTheme(isDark) {
+            val colorTheme = SettingColorTheme.getState(context = this)
+            val isDynamicColor = colorTheme.value == ColorThemeValue.wallpaper
+            ViewOnlyViewerTheme(isDark, isDynamicColor) {
                 Surface(color = MaterialTheme.colorScheme.background) {
                     AppScreen(viewModel = viewModel)
                 }
