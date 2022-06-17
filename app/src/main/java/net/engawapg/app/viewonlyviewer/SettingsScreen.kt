@@ -3,8 +3,10 @@ package net.engawapg.app.viewonlyviewer
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.*
@@ -99,7 +101,7 @@ fun SettingCellTapCountToOpenSettings() {
     SettingItemCell(
         title = stringResource(id = R.string.setting_title_tap_count_to_open_settings),
         value = options[tapCount.value - 1],
-        onClick = { showDialog = true }
+        modifier = Modifier.clickable { showDialog = true }
     )
 
     if (showDialog) {
@@ -134,7 +136,7 @@ fun SettingCellMultiGoBack() {
     SettingItemCell(
         title = stringResource(id = R.string.setting_title_multi_go_back),
         value = options[num.value - 1],
-        onClick = { showDialog = true}
+        modifier = Modifier.clickable { showDialog = true },
     )
 
     if (showDialog) {
@@ -156,7 +158,6 @@ fun SettingCellVersion() {
     SettingItemCell(
         title = stringResource(id = R.string.setting_title_version),
         value = BuildConfig.VERSION_NAME,
-        enableClick = false,
     )
 }
 
@@ -185,14 +186,12 @@ fun SettingsHeader(title: String) {
 fun SettingItemCell(
     title: String,
     value: String,
-    enableClick: Boolean = true,
-    onClick: ()->Unit = {}
+    modifier: Modifier = Modifier,
 ) {
     Surface(
         color = MaterialTheme.colorScheme.surface,
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
-            .clickable(enabled = enableClick, onClick = onClick),
     ) {
         Column {
             Text(
@@ -241,7 +240,11 @@ fun RadioButtonDialog(
             )
         },
         text = {
-            Column(Modifier.selectableGroup()) {
+            Column(
+                Modifier
+                    .selectableGroup()
+                    .verticalScroll(rememberScrollState())
+            ) {
                 Text(
                     text = text,
                 )
