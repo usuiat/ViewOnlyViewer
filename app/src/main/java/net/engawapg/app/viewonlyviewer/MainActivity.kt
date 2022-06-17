@@ -4,6 +4,7 @@ import android.Manifest
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
@@ -25,7 +26,13 @@ class MainActivity : ComponentActivity() {
 
 
         setContent {
-            ViewOnlyViewerTheme {
+            val darkTheme = SettingDarkTheme.getState(context = this)
+            val isDark = when (darkTheme.value) {
+                DarkThemeValue.Off -> false
+                DarkThemeValue.On -> true
+                else -> isSystemInDarkTheme()
+            }
+            ViewOnlyViewerTheme(isDark) {
                 Surface(color = MaterialTheme.colorScheme.background) {
                     AppScreen(viewModel = viewModel)
                 }

@@ -78,6 +78,9 @@ fun SettingsList() {
         item { SettingCellTapCountToOpenSettings() }
         item { SettingCellMultiGoBack() }
 
+        item { SettingsHeader(title = stringResource(id = R.string.setting_header_theme)) }
+        item { SettingCellDarkTheme() }
+
         item { SettingsHeader(title = stringResource(id = R.string.setting_header_about)) }
         item { SettingCellVersion() }
     }
@@ -154,6 +157,38 @@ fun SettingCellMultiGoBack() {
 }
 
 @Composable
+fun SettingCellDarkTheme() {
+    val context = LocalContext.current
+    val current = SettingDarkTheme.getState(context)
+    var showDialog by remember { mutableStateOf(false) }
+    val scope = rememberCoroutineScope()
+
+    val options = listOf(
+        stringResource(id = R.string.setting_value_off),
+        stringResource(id = R.string.setting_value_on),
+        stringResource(id = R.string.setting_value_use_system_settings),
+    )
+
+    SettingItemCell(
+        title = stringResource(id = R.string.setting_title_darktheme),
+        value = options[current.value],
+        modifier = Modifier.clickable { showDialog = true },
+    )
+
+    if (showDialog) {
+        RadioButtonDialog(
+            title = stringResource(id = R.string.setting_title_darktheme),
+            options = options,
+            selected = current.value,
+            onSelect = { selected ->
+                scope.launch { SettingDarkTheme.set(selected, context) }
+                showDialog = false
+            }
+        )
+    }
+}
+
+@Composable
 fun SettingCellVersion() {
     SettingItemCell(
         title = stringResource(id = R.string.setting_title_version),
@@ -223,7 +258,7 @@ fun SettingItemCell(
 @Composable
 fun RadioButtonDialog(
     title: String,
-    text: String,
+    text: String = "",
     options: List<String>,
     selected: Int,
     onSelect:(Int)->Unit,

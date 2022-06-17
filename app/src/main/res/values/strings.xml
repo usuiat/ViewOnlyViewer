@@ -27,4 +27,9 @@
     <string name="message_when_go_back_canceled">Perform back operation %1$d times quickly to exit the app.</string>
     <string name="setting_header_about">About this app</string>
     <string name="setting_title_version">Version</string>
+    <string name="setting_header_theme">Theme</string>
+    <string name="setting_title_darktheme">Dark theme</string>
+    <string name="setting_value_on">On</string>
+    <string name="setting_value_off">Off</string>
+    <string name="setting_value_use_system_settings">Use system settings</string>
 </resources>

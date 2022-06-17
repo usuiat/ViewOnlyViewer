@@ -28,4 +28,9 @@
     <string name="message_when_go_back_canceled">アプリを終了するには戻る操作を素早く%1$d回行ってください。</string>
     <string name="setting_header_about">アプリについて</string>
     <string name="setting_title_version">バージョン</string>
+    <string name="setting_header_theme">テーマ</string>
+    <string name="setting_title_darktheme">ダークモード</string>
+    <string name="setting_value_on">オン</string>
+    <string name="setting_value_off">オフ</string>
+    <string name="setting_value_use_system_settings">システム設定を使う</string>
 </resources>

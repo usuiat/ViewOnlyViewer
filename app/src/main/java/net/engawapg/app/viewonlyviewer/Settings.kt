@@ -22,6 +22,17 @@ val SettingMultiGoBack = SettingDefinition(
     intPreferencesKey("MultiGoBack"), 1
 )
 
+class DarkThemeValue {
+    companion object {
+        const val Off = 0
+        const val On = 1
+        const val UseSystemSettings = 2
+    }
+}
+val SettingDarkTheme = SettingDefinition(
+    intPreferencesKey("DarkTheme"), DarkThemeValue.Off
+)
+
 class SettingDefinition<T>(private val key: Preferences.Key<T>, private val default: T) {
     @Composable
     fun getState(context: Context): State<T> =
