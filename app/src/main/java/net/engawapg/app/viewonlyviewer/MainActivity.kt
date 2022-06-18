@@ -9,12 +9,14 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.ui.graphics.Color
 import androidx.core.content.PermissionChecker
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import net.engawapg.app.viewonlyviewer.ui.theme.ViewOnlyViewerTheme
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
@@ -29,8 +31,15 @@ class MainActivity : ComponentActivity() {
         val colorTheme = SettingColorTheme.get(this)
 
         setContent {
+            /* Set status bar color to transparent until theme settings are loaded */
+            val systemUiController = rememberSystemUiController()
+            systemUiController.setStatusBarColor(Color.Transparent)
+
+            /* Load theme settings */
             val darkThemeState = darkTheme.collectAsState(initial = DarkThemeValue.Undefined)
             val colorThemeState = colorTheme.collectAsState(initial = ColorThemeValue.Undefined)
+
+            /* After theme settings are loaded, display screen with applied theme */
             if ((darkThemeState.value != DarkThemeValue.Undefined) &&
                 (colorThemeState.value != ColorThemeValue.Undefined)) {
                 val isDark = when (darkThemeState.value) {
