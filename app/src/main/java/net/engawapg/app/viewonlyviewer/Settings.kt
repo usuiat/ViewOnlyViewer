@@ -28,6 +28,7 @@ class DarkThemeValue {
         const val Off = 0
         const val On = 1
         const val UseSystemSettings = 2
+        const val Undefined = -1
     }
 }
 val SettingDarkTheme = SettingDefinition(
@@ -39,6 +40,7 @@ class ColorThemeValue {
     companion object {
         const val appTheme = 0
         const val wallpaper = 1
+        const val Undefined = -1
     }
 }
 val SettingColorTheme = SettingDefinition(
@@ -50,7 +52,7 @@ class SettingDefinition<T>(private val key: Preferences.Key<T>, private val defa
     fun getState(context: Context): State<T> =
         get(context).collectAsState(default)
 
-    private fun get(context: Context): Flow<T> =
+    fun get(context: Context): Flow<T> =
         context.dataStore.data.map { preferences ->
             preferences[key] ?: default
         }

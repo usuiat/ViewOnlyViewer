@@ -8,6 +8,7 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.core.content.PermissionChecker
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -24,19 +25,24 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        val darkTheme = SettingDarkTheme.get(this)
+        val colorTheme = SettingColorTheme.get(this)
 
         setContent {
-            val darkTheme = SettingDarkTheme.getState(context = this)
-            val isDark = when (darkTheme.value) {
-                DarkThemeValue.Off -> false
-                DarkThemeValue.On -> true
-                else -> isSystemInDarkTheme()
-            }
-            val colorTheme = SettingColorTheme.getState(context = this)
-            val isDynamicColor = colorTheme.value == ColorThemeValue.wallpaper
-            ViewOnlyViewerTheme(isDark, isDynamicColor) {
-                Surface(color = MaterialTheme.colorScheme.background) {
-                    AppScreen(viewModel = viewModel)
+            val darkThemeState = darkTheme.collectAsState(initial = DarkThemeValue.Undefined)
+            val colorThemeState = colorTheme.collectAsState(initial = ColorThemeValue.Undefined)
+            if ((darkThemeState.value != DarkThemeValue.Undefined) &&
+                (colorThemeState.value != ColorThemeValue.Undefined)) {
+                val isDark = when (darkThemeState.value) {
+                    DarkThemeValue.Off -> false
+                    DarkThemeValue.On -> true
+                    else -> isSystemInDarkTheme()
+                }
+                val isDynamicColor = colorThemeState.value == ColorThemeValue.wallpaper
+                ViewOnlyViewerTheme(isDark, isDynamicColor) {
+                    Surface(color = MaterialTheme.colorScheme.background) {
+                        AppScreen(viewModel = viewModel)
+                    }
                 }
             }
         }
