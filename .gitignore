@@ -136,3 +136,4 @@ fabric.properties
 
 /app/release/app-release.aab
 /.idea/deploymentTargetDropDown.xml
+.idea/other.xml
