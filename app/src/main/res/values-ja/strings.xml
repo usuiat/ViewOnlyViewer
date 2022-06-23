@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">しゃしん</string>
-    <string name="rationale_permission">アプリが写真や動画を表示できるように、ストレージへのアクセスを許可してください。</string>
+    <string name="rationale_permission">写真や動画を表示するには、アプリがストレージにアクセスする必要があります。</string>
     <string name="ok">OK</string>
     <string name="cancel">キャンセル</string>
-    <string name="request_to_grant_permission">アプリが写真や動画を表示できるように、設定アプリでストレージへのアクセスを許可してください。</string>
+    <string name="request_to_grant_permission">設定アプリを開き、このアプリにストレージへのアクセスを許可してください。</string>
     <string name="desc_playpause">ビデオを再生・一時停止するボタン</string>
     <string name="desc_settings">設定</string>
     <string name="message_when_opening_settings_failed">設定を開くには素早く%1$d回タップしてください。</string>
@@ -36,4 +36,6 @@
     <string name="setting_title_colortheme">カラーテーマ</string>
     <string name="setting_value_app_colors">アプリのテーマカラー</string>
     <string name="setting_value_use_wallpaper_colors">壁紙の色</string>
+    <string name="request_permission">アプリが写真や動画を表示できるように、ストレージへのアクセスを許可してください。</string>
+    <string name="button_continue">続ける</string>
 </resources>

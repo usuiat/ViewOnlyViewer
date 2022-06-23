@@ -38,7 +38,7 @@ internal object SettingsScreenTokens {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(onEvent: (SettingsScreenEvent)->Unit = {}) {
-    val scrollBehavior = remember { TopAppBarDefaults.pinnedScrollBehavior() }
+    val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(rememberTopAppBarScrollState())
     val statusBarColor = TopAppBarDefaults.centerAlignedTopAppBarColors()
         .containerColor(scrollFraction = scrollBehavior.scrollFraction).value
     val systemUiController = rememberSystemUiController()
@@ -65,8 +65,10 @@ fun SettingsScreen(onEvent: (SettingsScreenEvent)->Unit = {}) {
                 }
             )
         }
-    ) {
-        SettingsList()
+    ) { innerPadding ->
+        Box(Modifier.padding(innerPadding)) {
+            SettingsList()
+        }
     }
 }
 

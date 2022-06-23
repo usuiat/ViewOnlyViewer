@@ -2,22 +2,19 @@ package net.engawapg.app.viewonlyviewer
 
 import android.Manifest
 import androidx.activity.compose.BackHandler
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.aspectRatio
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.GridCells
-import androidx.compose.foundation.lazy.LazyVerticalGrid
-import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.itemsIndexed
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.BlendMode
@@ -34,7 +31,9 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import coil.compose.AsyncImage
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
+import com.google.accompanist.permissions.shouldShowRationale
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -58,7 +57,7 @@ fun GalleryScreen(
     onItemSelected: (Int)->Unit = {},
     onEvent: (GalleryScreenEvent)->Unit = {},
 ) {
-    val scrollBehavior = remember {TopAppBarDefaults.enterAlwaysScrollBehavior()}
+    val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarScrollState())
     val statusBarColor = TopAppBarDefaults.centerAlignedTopAppBarColors()
         .containerColor(scrollFraction = scrollBehavior.scrollFraction).value
     val systemUiController = rememberSystemUiController()
@@ -102,23 +101,27 @@ fun GalleryScreen(
                 scrollBehavior = scrollBehavior
             )
         }
-    ) {
-        /* Permissionの取得状況によって表示内容を変える */
-        val ps = rememberPermissionState(Manifest.permission.READ_EXTERNAL_STORAGE)
-        when {
-            ps.hasPermission -> {
-                val items: List<GalleryItem> by viewModel.galleryItems.observeAsState(listOf())
-                Gallery(items, onItemSelected)
+    ) { innerPadding ->
+        Box(Modifier.padding(innerPadding)) {
+            /* Contents depends on the permission state */
+            var permissionRequested by rememberSaveable { mutableStateOf(false) }
+            val ps = rememberPermissionState(Manifest.permission.READ_EXTERNAL_STORAGE) {
+                permissionRequested = true
             }
-
-            ps.shouldShowRationale -> PermissionRationaleDialog {
-                ps.launchPermissionRequest()
-            }
-
-            ps.permissionRequested -> AskPermissionInSettingApp()
-
-            else -> SideEffect {
-                ps.launchPermissionRequest()
+            when {
+                ps.status.isGranted -> {
+                    val items: List<GalleryItem> by viewModel.galleryItems.observeAsState(listOf())
+                    Gallery(items, onItemSelected)
+                }
+                ps.status.shouldShowRationale -> RequestPermission(shouldShowRational = true) {
+                    ps.launchPermissionRequest()
+                }
+                permissionRequested -> {
+                    AskPermissionInSettingApp()
+                }
+                else -> RequestPermission(shouldShowRational = false) {
+                    ps.launchPermissionRequest()
+                }
             }
         }
     }
@@ -160,11 +163,10 @@ fun MultiTapIconButton(
     )
 }
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun Gallery(items: List<GalleryItem>, onItemSelected: (Int)->Unit = {}) {
     if (items.isNotEmpty()) {
-        LazyVerticalGrid(cells = GridCells.Fixed(COLUMN_NUM)) {
+        LazyVerticalGrid(columns = GridCells.Fixed(COLUMN_NUM)) {
             itemsIndexed(items) { index, item ->
                 GalleryItem(item = item, onSelected = { onItemSelected(index) })
             }
@@ -223,16 +225,25 @@ fun AskPermissionInSettingApp() {
 }
 
 @Composable
-fun PermissionRationaleDialog(onDialogResult: ()->Unit) {
-    AlertDialog(
-        text = { Text(stringResource(R.string.rationale_permission)) },
-        onDismissRequest = {},
-        confirmButton = {
-            TextButton(onClick = onDialogResult) {
-                Text(stringResource(R.string.ok))
-            }
-        },
-    )
+fun RequestPermission(shouldShowRational: Boolean, onClick: ()->Unit) {
+    Column(
+        modifier = Modifier.fillMaxSize(),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center,
+    ) {
+        val text = if (shouldShowRational) {
+            stringResource(id = R.string.rationale_permission)
+        } else {
+            stringResource(id = R.string.request_permission)
+        }
+        Text(
+            text = text,
+            modifier = Modifier.padding(20.dp)
+        )
+        Button(onClick = onClick) {
+            Text(stringResource(id = R.string.button_continue))
+        }
+    }
 }
 
 /**

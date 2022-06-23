@@ -1,9 +1,9 @@
 <resources>
     <string name="app_name">Photo</string>
-    <string name="rationale_permission">Please allow access to the storage so that the app can display photos and videos.</string>
+    <string name="rationale_permission">To display photos and videos, this app needs to access to the storage.</string>
     <string name="ok">OK</string>
     <string name="cancel">Cancel</string>
-    <string name="request_to_grant_permission">Please grant permission to access to the storage in the setting app so that the app can display photos and videos</string>
+    <string name="request_to_grant_permission">Open the settings app and grant permission to this app to access to the storage.</string>
     <string name="desc_playpause">Button to play or pause the video.</string>
     <string name="desc_settings">Settings</string>
     <string name="message_when_opening_settings_failed">Tap %1$dtimes quickly to open settings.</string>
@@ -35,4 +35,6 @@
     <string name="setting_title_colortheme">Color theme</string>
     <string name="setting_value_app_colors">Use app theme colors</string>
     <string name="setting_value_use_wallpaper_colors">Use wallpaper colors</string>
+    <string name="request_permission">Please allow access to the storage so that this app can display photos and videos</string>
+    <string name="button_continue">Continue</string>
 </resources>
