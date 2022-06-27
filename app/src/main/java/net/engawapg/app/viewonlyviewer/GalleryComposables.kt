@@ -80,23 +80,23 @@ fun GalleryScreen(
             CenterAlignedTopAppBar(
                 title = { Text(stringResource(R.string.app_name)) },
                 actions = {
-                     MultiTapIconButton(
-                         tapCount = tapCount.value,
-                         onTapComplete = { success ->
-                             if (success) {
-                                 onEvent(GalleryScreenEvent.SelectSettings)
-                             } else {
-                                 scope.launch {
-                                     snackbarHostState.showSnackbar(failedMessage)
-                                 }
-                             }
-                         }
-                     ) {
-                         Icon(
-                             imageVector = Icons.Default.Settings,
-                             contentDescription = stringResource(id = R.string.desc_settings),
-                         )
-                     }
+                    MultiTapIconButton(
+                        tapCount = tapCount.value,
+                        onTapComplete = { success ->
+                            if (success) {
+                                onEvent(GalleryScreenEvent.SelectSettings)
+                            } else {
+                                scope.launch {
+                                    snackbarHostState.showSnackbar(failedMessage)
+                                }
+                            }
+                        }
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Settings,
+                            contentDescription = stringResource(id = R.string.desc_settings),
+                        )
+                    }
                 },
                 scrollBehavior = scrollBehavior
             )
@@ -110,7 +110,7 @@ fun GalleryScreen(
             }
             when {
                 ps.status.isGranted -> {
-                    val items: List<GalleryItem> by viewModel.galleryItems.observeAsState(listOf())
+                    val items = viewModel.galleryItems.observeAsState(listOf())
                     Gallery(items, onItemSelected)
                 }
                 ps.status.shouldShowRationale -> RequestPermission(shouldShowRational = true) {
@@ -164,10 +164,10 @@ fun MultiTapIconButton(
 }
 
 @Composable
-fun Gallery(items: List<GalleryItem>, onItemSelected: (Int)->Unit = {}) {
-    if (items.isNotEmpty()) {
+fun Gallery(items: State<List<GalleryItem>>, onItemSelected: (Int)->Unit = {}) {
+    if (items.value.isNotEmpty()) {
         LazyVerticalGrid(columns = GridCells.Fixed(COLUMN_NUM)) {
-            itemsIndexed(items) { index, item ->
+            itemsIndexed(items.value) { index, item ->
                 GalleryItem(item = item, onSelected = { onItemSelected(index) })
             }
         }
