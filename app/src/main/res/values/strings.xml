@@ -37,4 +37,7 @@
     <string name="setting_value_use_wallpaper_colors">Use wallpaper colors</string>
     <string name="request_permission">Please allow access to the storage so that this app can display photos and videos</string>
     <string name="button_continue">Continue</string>
+    <string name="setting_header_display">Display</string>
+    <string name="setting_title_folder">Folder</string>
+    <string name="setting_desc_folder">Select folders to display.</string>
 </resources>

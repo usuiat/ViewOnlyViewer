@@ -7,10 +7,10 @@ import androidx.activity.compose.setContent
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.*
 import androidx.compose.ui.graphics.Color
 import androidx.core.content.PermissionChecker
+import androidx.navigation.NavController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -67,37 +67,34 @@ class MainActivity : ComponentActivity() {
     }
 }
 
+val LocalNavController = staticCompositionLocalOf<NavController> { error("No NavController.") }
+
 @Composable
 fun AppScreen(viewModel: MainViewModel) {
     val navController = rememberNavController()
-    NavHost(navController = navController, startDestination = "gallery") {
-        composable("gallery") {
-            GalleryScreen(
-                viewModel = viewModel,
-                onItemSelected = { index -> navController.navigate("viewer/$index") },
-                onEvent = { event ->
-                    when(event) {
-                        GalleryScreenEvent.SelectSettings ->
-                            navController.navigate("settings")
+    CompositionLocalProvider(LocalNavController provides navController) {
+        NavHost(navController = navController, startDestination = "gallery") {
+            composable("gallery") {
+                GalleryScreen(
+                    viewModel = viewModel,
+                    onItemSelected = { index -> navController.navigate("viewer/$index") },
+                    onEvent = { event ->
+                        when(event) {
+                            GalleryScreenEvent.SelectSettings ->
+                                navController.navigate("settings")
+                        }
                     }
-                }
-            )
-        }
-        composable(
-            route = "viewer/{index}",
-            arguments = listOf(navArgument("index") { type = NavType.IntType })
-        ) { backStackEntry ->
-            val index = backStackEntry.arguments?.getInt("index") ?: 0
-            ViewerScreen(viewModel = viewModel, index = index)
-        }
-        composable("settings") {
-            SettingsScreen(
-                onEvent = { event ->
-                    when(event) {
-                        SettingsScreenEvent.SelectBack -> navController.navigateUp()
-                    }
-                }
-            )
+                )
+            }
+            composable(
+                route = "viewer/{index}",
+                arguments = listOf(navArgument("index") { type = NavType.IntType })
+            ) { backStackEntry ->
+                val index = backStackEntry.arguments?.getInt("index") ?: 0
+                ViewerScreen(viewModel = viewModel, index = index)
+            }
+            composable("settings") { SettingsScreen() }
+            composable("setting_folder") { SettingFolderScreen() }
         }
     }
 }

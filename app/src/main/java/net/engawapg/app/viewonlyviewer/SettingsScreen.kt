@@ -25,19 +25,9 @@ import androidx.compose.ui.window.DialogProperties
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import kotlinx.coroutines.launch
 
-enum class SettingsScreenEvent {
-    SelectBack
-}
-
-internal object SettingsScreenTokens {
-    val ItemPaddingStart = 20.dp
-    val ItemPaddingVertical = 16.dp
-    val HeaderPaddingTop = 36.dp
-}
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SettingsScreen(onEvent: (SettingsScreenEvent)->Unit = {}) {
+fun SettingsScreen() {
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(rememberTopAppBarScrollState())
     val statusBarColor = TopAppBarDefaults.centerAlignedTopAppBarColors()
         .containerColor(scrollFraction = scrollBehavior.scrollFraction).value
@@ -50,12 +40,13 @@ fun SettingsScreen(onEvent: (SettingsScreenEvent)->Unit = {}) {
     Scaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
+            val navController = LocalNavController.current
             SmallTopAppBar(
                 title = { Text(stringResource(R.string.settings))},
                 scrollBehavior = scrollBehavior,
                 navigationIcon = {
                     IconButton(
-                        onClick = { onEvent(SettingsScreenEvent.SelectBack) }
+                        onClick = { navController.navigateUp() }
                     ) {
                         Icon(
                             imageVector = Icons.Default.ArrowBack,
@@ -77,6 +68,9 @@ fun SettingsList() {
     LazyColumn(
         modifier = Modifier.fillMaxWidth()
     ) {
+        item { SettingsHeader(title = stringResource(id = R.string.setting_header_display)) }
+        item { SettingCellFolder() }
+
         item { SettingsHeader(title = stringResource(id = R.string.setting_header_childproof)) }
         item { SettingCellTapCountToOpenSettings() }
         item { SettingCellMultiGoBack() }
@@ -90,6 +84,16 @@ fun SettingsList() {
         item { SettingsHeader(title = stringResource(id = R.string.setting_header_about)) }
         item { SettingCellVersion() }
     }
+}
+
+@Composable
+fun SettingCellFolder() {
+    val navController = LocalNavController.current
+    SettingItemCell(
+        title = stringResource(id = R.string.setting_title_folder),
+        value = stringResource(id = R.string.setting_desc_folder),
+        modifier = Modifier.clickable { navController.navigate("setting_folder") },
+    )
 }
 
 @Composable
