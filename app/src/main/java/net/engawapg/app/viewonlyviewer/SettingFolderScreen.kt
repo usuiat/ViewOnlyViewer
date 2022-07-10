@@ -1,6 +1,5 @@
 package net.engawapg.app.viewonlyviewer
 
-import android.net.Uri
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -10,7 +9,6 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
-import androidx.compose.runtime.Stable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
@@ -18,31 +16,13 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 
-@Stable
-data class Folder(
-    val name: String,
-    val path: String = "/path/to/folder",
-    val thumbnailUri: Uri = Uri.parse("content://media/external/file/22"),
-)
-val folders = listOf<Folder>(
-    Folder("Photo"),
-    Folder("LINE"),
-    Folder("Download"),
-    Folder("ふぉるだ"),
-    Folder("Test1"),
-    Folder("Test2"),
-    Folder("Test3"),
-    Folder("Test4"),
-    Folder("Test5"),
-    Folder("Test6"),
-)
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SettingFolderScreen() {
+fun SettingFolderScreen(viewModel: SettingFolderViewModel = viewModel()) {
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(rememberTopAppBarScrollState())
     val statusBarColor = TopAppBarDefaults.centerAlignedTopAppBarColors()
         .containerColor(scrollFraction = scrollBehavior.scrollFraction).value
@@ -74,7 +54,7 @@ fun SettingFolderScreen() {
     ) { innerPadding ->
         LazyColumn(contentPadding = innerPadding) {
             item { SettingFolderDescription() }
-            items(folders) { folder ->
+            items(viewModel.uiState.folderList) { folder ->
                 SettingFolderCell(folder)
             }
         }
@@ -97,9 +77,8 @@ fun SettingFolderDescription() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SettingFolderCell(folder: Folder) {
-    Column(
-    ) {
+fun SettingFolderCell(folder: FolderItem) {
+    Column {
         Row(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier

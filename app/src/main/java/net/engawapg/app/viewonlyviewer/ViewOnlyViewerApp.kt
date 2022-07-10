@@ -31,6 +31,6 @@ class ViewOnlyViewerApp: Application(), ImageLoaderFactory {
 }
 
 val appModule = module {
-    single { GalleryModel() }
+    single { GalleryModel(androidContext()) }
     viewModel { MainViewModel(get(), androidApplication()) }
 }
