@@ -54,8 +54,13 @@ fun SettingFolderScreen(viewModel: SettingFolderViewModel = viewModel()) {
     ) { innerPadding ->
         LazyColumn(contentPadding = innerPadding) {
             item { SettingFolderDescription() }
-            items(viewModel.uiState.folderList) { folder ->
-                SettingFolderCell(folder)
+            items(viewModel.folders) { folder ->
+                SettingFolderCell(
+                    folder = folder,
+                    onCheckedChange = { checked ->
+                        viewModel.setFolderVisibility(folder, checked)
+                    }
+                )
             }
         }
     }
@@ -77,7 +82,7 @@ fun SettingFolderDescription() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SettingFolderCell(folder: FolderItem) {
+fun SettingFolderCell(folder: SettingFolderItem, onCheckedChange: (Boolean) -> Unit) {
     Column {
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -106,14 +111,14 @@ fun SettingFolderCell(folder: FolderItem) {
                     style = MaterialTheme.typography.titleMedium,
                 )
                 Text(
-                    text = folder.path,
+                    text = folder.parentPath,
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.outline,
                 )
             }
             Checkbox(
-                checked = true,
-                onCheckedChange = {},
+                checked = folder.visibility,
+                onCheckedChange = onCheckedChange,
             )
         }
         Divider(
