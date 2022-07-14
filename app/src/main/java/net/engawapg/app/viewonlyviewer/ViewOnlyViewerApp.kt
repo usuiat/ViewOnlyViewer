@@ -4,7 +4,6 @@ import android.app.Application
 import coil.ImageLoader
 import coil.ImageLoaderFactory
 import coil.decode.VideoFrameDecoder
-import org.koin.android.ext.koin.androidApplication
 import org.koin.android.ext.koin.androidContext
 import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.core.context.startKoin
@@ -33,5 +32,5 @@ class ViewOnlyViewerApp: Application(), ImageLoaderFactory {
 val appModule = module {
     single { GalleryModel(androidContext()) }
     single { SettingsRepository(androidContext()) }
-    viewModel { MainViewModel(get(), androidApplication()) }
+    viewModel { MainViewModel(get()) }
 }

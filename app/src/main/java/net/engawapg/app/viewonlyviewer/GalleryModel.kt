@@ -26,7 +26,7 @@ class GalleryModel(private val context: Context) {
     var folders = listOf<FolderItem>()
         private set
 
-    fun load(ctx: Context) {
+    fun load() {
         val list = mutableListOf<GalleryItem>()
 
         val contentUri = MediaStore.Files.getContentUri("external")
@@ -43,7 +43,7 @@ class GalleryModel(private val context: Context) {
         val selectionArgs = null
         val sortOrder = "${MediaStore.Files.FileColumns.DATE_ADDED} DESC"
 
-        ctx.contentResolver.query(
+        context.contentResolver.query(
             contentUri, projection, selection, selectionArgs, sortOrder
         )?.use { cursor -> /* cursorは、検索結果の各行の情報にアクセスするためのオブジェクト。*/
             /* 必要な情報が格納されている列番号を取得する。 */
