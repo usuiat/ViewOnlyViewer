@@ -26,7 +26,7 @@ class GalleryModel(private val context: Context) {
     var folders = listOf<FolderItem>()
         private set
 
-    fun load(hideFolderIds: Set<String> = setOf()) {
+    fun load(ignoreFolderIds: Set<String> = setOf()) {
         val list = mutableListOf<GalleryItem>()
 
         val contentUri = MediaStore.Files.getContentUri("external")
@@ -37,14 +37,14 @@ class GalleryModel(private val context: Context) {
             MediaStore.Files.FileColumns.PARENT,
         )
         /* Question marks for the number of the set size */
-        val questions = hideFolderIds.joinToString { "?" }
+        val questions = ignoreFolderIds.joinToString { "?" }
         val selection = MediaStore.Files.FileColumns.MEDIA_TYPE + " in (?,?) " +
                 " AND " +
                 MediaStore.Files.FileColumns.PARENT + " not in ($questions) "
         val selectionArgs = arrayOf(
             MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE.toString(),
             MediaStore.Files.FileColumns.MEDIA_TYPE_VIDEO.toString(),
-        ) + hideFolderIds.toTypedArray()
+        ) + ignoreFolderIds.toTypedArray()
         val sortOrder = "${MediaStore.Files.FileColumns.DATE_ADDED} DESC"
 
         context.contentResolver.query(

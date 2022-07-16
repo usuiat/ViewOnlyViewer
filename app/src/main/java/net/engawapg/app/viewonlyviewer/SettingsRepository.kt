@@ -7,30 +7,30 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
 data class AppSettings(
-    val hideFolderIds: Set<String>,
+    val ignoreFolderIds: Set<String>,
 )
 
 class SettingsRepository(private val context: Context) {
     private object PreferenceKeys {
-        val HIDE_FOLDERS = stringSetPreferencesKey("hide_folders")
+        val IGNORE_FOLDERS = stringSetPreferencesKey("ignore_folders")
     }
 
     val appSettingsFlow: Flow<AppSettings> = context.dataStore.data.map { preferences ->
-        val hideFolderIds = preferences[PreferenceKeys.HIDE_FOLDERS] ?: setOf()
-        AppSettings(hideFolderIds)
+        val ignoreFolderIds = preferences[PreferenceKeys.IGNORE_FOLDERS] ?: setOf()
+        AppSettings(ignoreFolderIds)
     }
 
-    suspend fun addHideFolderId(id: String) {
+    suspend fun addIgnoreFolderId(id: String) {
         context.dataStore.edit { preferences ->
-            val ids = preferences[PreferenceKeys.HIDE_FOLDERS] ?: setOf()
-            preferences[PreferenceKeys.HIDE_FOLDERS] = ids + id
+            val ids = preferences[PreferenceKeys.IGNORE_FOLDERS] ?: setOf()
+            preferences[PreferenceKeys.IGNORE_FOLDERS] = ids + id
         }
     }
 
-    suspend fun removeHideFolderId(id: String) {
+    suspend fun removeIgnoreFolderId(id: String) {
         context.dataStore.edit { preferences ->
-            val ids = preferences[PreferenceKeys.HIDE_FOLDERS] ?: setOf()
-            preferences[PreferenceKeys.HIDE_FOLDERS] = ids - id
+            val ids = preferences[PreferenceKeys.IGNORE_FOLDERS] ?: setOf()
+            preferences[PreferenceKeys.IGNORE_FOLDERS] = ids - id
         }
     }
 }

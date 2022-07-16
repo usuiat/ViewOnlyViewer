@@ -10,24 +10,24 @@ import org.koin.core.component.get
 
 class MainViewModel(private val model: GalleryModel): ViewModel(), KoinComponent {
     private val settingsRepo: SettingsRepository = get()
-    private var hideFolderIds: Set<String>? = null
+    private var ignoreFolderIds: Set<String>? = null
     val galleryItems = MutableLiveData<List<GalleryItem>>().apply { value = listOf() }
 
     init {
         viewModelScope.launch {
             settingsRepo.appSettingsFlow.collect { appSettings ->
                 viewModelScope.launch(Dispatchers.IO) {
-                    model.load(appSettings.hideFolderIds)
+                    model.load(appSettings.ignoreFolderIds)
                     galleryItems.postValue(model.items)
                 }
-                hideFolderIds = appSettings.hideFolderIds
+                ignoreFolderIds = appSettings.ignoreFolderIds
             }
         }
     }
 
     fun loadGallery() {
         viewModelScope.launch(Dispatchers.IO) {
-            val ids = hideFolderIds
+            val ids = ignoreFolderIds
             if (ids != null) {
                 model.load(ids)
                 galleryItems.postValue(model.items)

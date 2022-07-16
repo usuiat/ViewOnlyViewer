@@ -35,14 +35,14 @@ class SettingFolderViewModel: ViewModel(), KoinComponent {
             }.join()
 
             val appSettings = settingsRepo.appSettingsFlow.first()
-            val hideFolderIds = appSettings.hideFolderIds.map { it.toInt() }
+            val ignoreFolderIds = appSettings.ignoreFolderIds.map { it.toInt() }
             val settingFolderItems = galleryModel.folders.map { item ->
                 SettingFolderItem(
                     name = item.name,
                     id = item.id,
                     parentPath = item.path,
                     thumbnailUri = item.thumbnailUri,
-                    visibility = !hideFolderIds.contains(item.id)
+                    visibility = !ignoreFolderIds.contains(item.id)
                 )
             }
             folders.addAll(settingFolderItems)
@@ -52,10 +52,10 @@ class SettingFolderViewModel: ViewModel(), KoinComponent {
     fun setFolderVisibility(folder: SettingFolderItem, visibility: Boolean) {
         viewModelScope.launch {
             if (visibility) {
-                settingsRepo.removeHideFolderId(folder.id.toString())
+                settingsRepo.removeIgnoreFolderId(folder.id.toString())
             }
             else {
-                settingsRepo.addHideFolderId(folder.id.toString())
+                settingsRepo.addIgnoreFolderId(folder.id.toString())
             }
         }
         val index = folders.indexOf(folder)
