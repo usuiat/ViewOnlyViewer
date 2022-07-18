@@ -29,11 +29,8 @@ import com.google.accompanist.permissions.rememberPermissionState
 import com.google.accompanist.permissions.shouldShowRationale
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import net.engawapg.app.viewonlyviewer.ui.theme.ViewOnlyViewerTheme
-import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class MainActivity : ComponentActivity() {
-
-    private val viewModel: MainViewModel by viewModel()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -61,7 +58,7 @@ class MainActivity : ComponentActivity() {
                 val isDynamicColor = colorThemeState.value == ColorThemeValue.wallpaper
                 ViewOnlyViewerTheme(isDark, isDynamicColor) {
                     Surface(color = MaterialTheme.colorScheme.background) {
-                        AppScreen(viewModel = viewModel)
+                        AppScreen()
                     }
                 }
             }
@@ -73,7 +70,7 @@ val LocalNavController = staticCompositionLocalOf<NavController> { error("No Nav
 
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
-fun AppScreen(viewModel: MainViewModel) {
+fun AppScreen() {
     /* Contents depends on the permission state */
     var permissionRequested by rememberSaveable { mutableStateOf(false) }
     val ps = rememberPermissionState(Manifest.permission.READ_EXTERNAL_STORAGE) {
@@ -81,7 +78,7 @@ fun AppScreen(viewModel: MainViewModel) {
     }
     when {
         ps.status.isGranted -> {
-            AppNavigation(viewModel = viewModel)
+            AppNavigation()
         }
         ps.status.shouldShowRationale -> RequestPermission(shouldShowRational = true) {
             ps.launchPermissionRequest()
@@ -96,13 +93,12 @@ fun AppScreen(viewModel: MainViewModel) {
 }
 
 @Composable
-fun AppNavigation(viewModel: MainViewModel) {
+fun AppNavigation() {
     val navController = rememberNavController()
     CompositionLocalProvider(LocalNavController provides navController) {
         NavHost(navController = navController, startDestination = "gallery") {
             composable("gallery") {
                 GalleryScreen(
-                    viewModel = viewModel,
                     onItemSelected = { index -> navController.navigate("viewer/$index") },
                     onEvent = { event ->
                         when(event) {
@@ -117,7 +113,7 @@ fun AppNavigation(viewModel: MainViewModel) {
                 arguments = listOf(navArgument("index") { type = NavType.IntType })
             ) { backStackEntry ->
                 val index = backStackEntry.arguments?.getInt("index") ?: 0
-                ViewerScreen(viewModel = viewModel, index = index)
+                ViewerScreen(index = index)
             }
             composable("settings") { SettingsScreen() }
             composable("setting_folder") { SettingFolderScreen() }

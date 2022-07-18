@@ -29,6 +29,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import kotlinx.coroutines.Job
@@ -49,7 +50,7 @@ private const val TIMEOUT_TO_CANCEL_ACTION_PER_BACK = 500L
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun GalleryScreen(
-    viewModel: MainViewModel,
+    viewModel: GalleryViewModel = viewModel(),
     onItemSelected: (Int)->Unit = {},
     onEvent: (GalleryScreenEvent)->Unit = {},
 ) {
