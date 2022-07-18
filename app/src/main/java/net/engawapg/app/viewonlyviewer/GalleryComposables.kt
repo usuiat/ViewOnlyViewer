@@ -1,11 +1,12 @@
 package net.engawapg.app.viewonlyviewer
 
-import android.Manifest
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.itemsIndexed
@@ -14,7 +15,6 @@ import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.BlendMode
@@ -30,10 +30,6 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import coil.compose.AsyncImage
-import com.google.accompanist.permissions.ExperimentalPermissionsApi
-import com.google.accompanist.permissions.isGranted
-import com.google.accompanist.permissions.rememberPermissionState
-import com.google.accompanist.permissions.shouldShowRationale
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -50,7 +46,7 @@ private const val TIMEOUT_TO_CANCEL_ACTION_PER_TAP = 300L
 /* Time out (msec) to cancel invoking go back actions for each operation. */
 private const val TIMEOUT_TO_CANCEL_ACTION_PER_BACK = 500L
 
-@OptIn(ExperimentalPermissionsApi::class, ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun GalleryScreen(
     viewModel: MainViewModel,
@@ -103,26 +99,8 @@ fun GalleryScreen(
         }
     ) { innerPadding ->
         Box(Modifier.padding(innerPadding)) {
-            /* Contents depends on the permission state */
-            var permissionRequested by rememberSaveable { mutableStateOf(false) }
-            val ps = rememberPermissionState(Manifest.permission.READ_EXTERNAL_STORAGE) {
-                permissionRequested = true
-            }
-            when {
-                ps.status.isGranted -> {
-                    val items = viewModel.galleryItems.observeAsState(listOf())
-                    Gallery(items, onItemSelected)
-                }
-                ps.status.shouldShowRationale -> RequestPermission(shouldShowRational = true) {
-                    ps.launchPermissionRequest()
-                }
-                permissionRequested -> {
-                    AskPermissionInSettingApp()
-                }
-                else -> RequestPermission(shouldShowRational = false) {
-                    ps.launchPermissionRequest()
-                }
-            }
+            val items = viewModel.galleryItems.observeAsState(listOf())
+            Gallery(items, onItemSelected)
         }
     }
 
@@ -207,41 +185,6 @@ fun GalleryItem(item: GalleryItem, onSelected: ()->Unit) {
                     .align(Alignment.TopEnd)
                     .padding(4.dp)
             )
-        }
-    }
-}
-
-@Composable
-fun AskPermissionInSettingApp() {
-    Box(
-        modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
-    ) {
-        Text(
-            text = stringResource(R.string.request_to_grant_permission),
-            modifier = Modifier.padding(20.dp)
-        )
-    }
-}
-
-@Composable
-fun RequestPermission(shouldShowRational: Boolean, onClick: ()->Unit) {
-    Column(
-        modifier = Modifier.fillMaxSize(),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center,
-    ) {
-        val text = if (shouldShowRational) {
-            stringResource(id = R.string.rationale_permission)
-        } else {
-            stringResource(id = R.string.request_permission)
-        }
-        Text(
-            text = text,
-            modifier = Modifier.padding(20.dp)
-        )
-        Button(onClick = onClick) {
-            Text(stringResource(id = R.string.button_continue))
         }
     }
 }
