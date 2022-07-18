@@ -104,6 +104,12 @@ fun GalleryScreen(
         }
     }
 
+    ObserveLifecycleEvent { event ->
+        if (event == Lifecycle.Event.ON_RESUME) {
+            viewModel.loadGallery()
+        }
+    }
+
     // Multiple go back operation to exit app.
     MultiGoBackHandler(backCount.value) {
         scope.launch {
