@@ -17,6 +17,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -34,32 +35,32 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        val darkTheme = SettingDarkTheme.get(this)
-        val colorTheme = SettingColorTheme.get(this)
-
         setContent {
+            val viewModel: MainViewModel = viewModel()
+            val uiState by viewModel.uiState.collectAsState()
+            AppScreen(uiState)
+        }
+    }
+}
+
+@Composable
+fun AppScreen(uiState: MainUiState) {
+    when (uiState) {
+        is MainUiState.Loading -> {
             /* Set status bar color to transparent until theme settings are loaded */
             val systemUiController = rememberSystemUiController()
             systemUiController.setStatusBarColor(Color.Transparent)
-
-            /* Load theme settings */
-            val darkThemeState = darkTheme.collectAsState(initial = DarkThemeValue.Undefined)
-            val colorThemeState = colorTheme.collectAsState(initial = ColorThemeValue.Undefined)
-
-            /* After theme settings are loaded, display screen with applied theme */
-            if ((darkThemeState.value != DarkThemeValue.Undefined) &&
-                (colorThemeState.value != ColorThemeValue.Undefined)) {
-                val isDark = when (darkThemeState.value) {
-                    DarkThemeValue.Off -> false
-                    DarkThemeValue.On -> true
-                    else -> isSystemInDarkTheme()
-                }
-                val isDynamicColor = colorThemeState.value == ColorThemeValue.wallpaper
-                ViewOnlyViewerTheme(isDark, isDynamicColor) {
-                    Surface(color = MaterialTheme.colorScheme.background) {
-                        AppScreen()
-                    }
+        }
+        is MainUiState.Loaded -> {
+            val isDark = when (uiState.darkTheme) {
+                DarkThemeSetting.Off -> false
+                DarkThemeSetting.On -> true
+                DarkThemeSetting.UseSystemSettings -> isSystemInDarkTheme()
+            }
+            val isDynamicColor = uiState.colorTheme == ColorThemeSetting.Wallpaper
+            ViewOnlyViewerTheme(isDark, isDynamicColor) {
+                Surface(color = MaterialTheme.colorScheme.background) {
+                    AppContent()
                 }
             }
         }
@@ -70,7 +71,7 @@ val LocalNavController = staticCompositionLocalOf<NavController> { error("No Nav
 
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
-fun AppScreen() {
+fun AppContent() {
     /* Contents depends on the permission state */
     var permissionRequested by rememberSaveable { mutableStateOf(false) }
     val ps = rememberPermissionState(Manifest.permission.READ_EXTERNAL_STORAGE) {
