@@ -12,23 +12,28 @@ import org.koin.core.component.get
 class MainViewModel: ViewModel(), KoinComponent {
     private val settingsRepo: SettingsRepository = get()
 
-    val uiState: StateFlow<MainUiState> = settingsRepo.appSettingsFlow.map {  settings ->
-        MainUiState.Loaded(
-            settings.darkTheme,
-            settings.colorTheme,
+    val uiState: StateFlow<MainUiState> = settingsRepo.appSettingsFlow.map { settings ->
+        MainUiState(
+            isLoaded = true,
+            darkTheme = settings.darkTheme,
+            colorTheme = settings.colorTheme
         )
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5000),
-        initialValue = MainUiState.Loading
+        initialValue = MainUiStateDefault
     )
 }
 
-sealed interface MainUiState {
-    object Loading: MainUiState
+data class MainUiState(
+    val isLoaded: Boolean,
+    val darkTheme: DarkThemeSetting,
+    val colorTheme: ColorThemeSetting,
+)
 
-    data class Loaded(
-        val darkTheme: DarkThemeSetting,
-        val colorTheme: ColorThemeSetting,
-    ): MainUiState
-}
+private val MainUiStateDefault = MainUiState(
+    isLoaded = false,
+    /* The following values are not used when isLoaded is false. */
+    darkTheme = DarkThemeSetting.UseSystemSettings,
+    colorTheme = ColorThemeSetting.Wallpaper,
+)
