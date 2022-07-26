@@ -14,7 +14,7 @@ class MainViewModel: ViewModel(), KoinComponent {
 
     val uiState: StateFlow<MainUiState> = settingsRepo.appSettingsFlow.map { settings ->
         MainUiState(
-            isLoaded = true,
+            loading = false,
             darkTheme = settings.darkTheme,
             colorTheme = settings.colorTheme
         )
@@ -26,14 +26,14 @@ class MainViewModel: ViewModel(), KoinComponent {
 }
 
 data class MainUiState(
-    val isLoaded: Boolean,
+    val loading: Boolean,
     val darkTheme: DarkThemeSetting,
     val colorTheme: ColorThemeSetting,
 )
 
 private val MainUiStateDefault = MainUiState(
-    isLoaded = false,
-    /* The following values are not used when isLoaded is false. */
+    loading = true,
+    /* The following values are not used when loading is true. */
     darkTheme = DarkThemeSetting.UseSystemSettings,
     colorTheme = ColorThemeSetting.Wallpaper,
 )
