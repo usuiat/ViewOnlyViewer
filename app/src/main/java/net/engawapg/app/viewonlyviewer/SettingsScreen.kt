@@ -22,12 +22,27 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import kotlinx.coroutines.launch
 
+@Composable
+fun SettingsScreen(viewModel: SettingsViewModel = viewModel()) {
+    val uiState by viewModel.uiState.collectAsState()
+    SettingsContent(
+        uiState = uiState,
+        onChangeDarkTheme = { darkTheme -> viewModel.setDarkTheme(darkTheme) },
+        onChangeColorTheme = { colorTheme -> viewModel.setColorTheme(colorTheme) },
+    )
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SettingsScreen() {
+fun SettingsContent(
+    uiState: SettingsUiState,
+    onChangeDarkTheme: (DarkThemeSetting) -> Unit,
+    onChangeColorTheme: (ColorThemeSetting) -> Unit,
+) {
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(rememberTopAppBarScrollState())
     val statusBarColor = TopAppBarDefaults.centerAlignedTopAppBarColors()
         .containerColor(scrollFraction = scrollBehavior.scrollFraction).value
@@ -58,13 +73,25 @@ fun SettingsScreen() {
         }
     ) { innerPadding ->
         Box(Modifier.padding(innerPadding)) {
-            SettingsList()
+            if (!uiState.loading) {
+                SettingsList(
+                    darkTheme = uiState.darkTheme!!,
+                    onChangeDarkTheme = onChangeDarkTheme,
+                    colorTheme = uiState.colorTheme!!,
+                    onChangeColorTheme = onChangeColorTheme,
+                )
+            }
         }
     }
 }
 
 @Composable
-fun SettingsList() {
+fun SettingsList(
+    darkTheme: DarkThemeSetting,
+    onChangeDarkTheme: (DarkThemeSetting) -> Unit,
+    colorTheme: ColorThemeSetting,
+    onChangeColorTheme: (ColorThemeSetting) -> Unit,
+) {
     LazyColumn(
         modifier = Modifier.fillMaxWidth()
     ) {
@@ -76,9 +103,19 @@ fun SettingsList() {
         item { SettingCellMultiGoBack() }
 
         item { SettingsHeader(title = stringResource(id = R.string.setting_header_theme)) }
-        item { SettingCellDarkTheme() }
+        item {
+            SettingCellDarkTheme(
+                darkTheme = darkTheme,
+                onChangeDarkTheme = onChangeDarkTheme,
+            )
+        }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            item { SettingCellColorTheme() }
+            item {
+                SettingCellColorTheme(
+                    colorTheme = colorTheme,
+                    onChangeColorTheme = onChangeColorTheme,
+                )
+            }
         }
 
         item { SettingsHeader(title = stringResource(id = R.string.setting_header_about)) }
@@ -167,11 +204,12 @@ fun SettingCellMultiGoBack() {
 }
 
 @Composable
-fun SettingCellDarkTheme() {
-    val context = LocalContext.current
-    val current = SettingDarkTheme.getState(context)
+fun SettingCellDarkTheme(
+    darkTheme: DarkThemeSetting,
+    onChangeDarkTheme: (DarkThemeSetting) -> Unit
+) {
+    val current = darkTheme.toInt()
     var showDialog by remember { mutableStateOf(false) }
-    val scope = rememberCoroutineScope()
 
     val options = listOf(
         stringResource(id = R.string.setting_value_off),
@@ -181,7 +219,7 @@ fun SettingCellDarkTheme() {
 
     SettingItemCell(
         title = stringResource(id = R.string.setting_title_darktheme),
-        value = options[current.value],
+        value = options[current],
         modifier = Modifier.clickable { showDialog = true },
     )
 
@@ -189,9 +227,9 @@ fun SettingCellDarkTheme() {
         RadioButtonDialog(
             title = stringResource(id = R.string.setting_title_darktheme),
             options = options,
-            selected = current.value,
+            selected = current,
             onSelect = { selected ->
-                scope.launch { SettingDarkTheme.set(selected, context) }
+                onChangeDarkTheme(DarkThemeSetting.fromInt(selected))
                 showDialog = false
             }
         )
@@ -199,11 +237,12 @@ fun SettingCellDarkTheme() {
 }
 
 @Composable
-fun SettingCellColorTheme() {
-    val context = LocalContext.current
-    val current = SettingColorTheme.getState(context)
+fun SettingCellColorTheme(
+    colorTheme: ColorThemeSetting,
+    onChangeColorTheme: (ColorThemeSetting) -> Unit,
+) {
+    val current = colorTheme.toInt()
     var showDialog by remember { mutableStateOf(false) }
-    val scope = rememberCoroutineScope()
 
     val options = listOf(
         stringResource(id = R.string.setting_value_app_colors),
@@ -212,7 +251,7 @@ fun SettingCellColorTheme() {
 
     SettingItemCell(
         title = stringResource(id = R.string.setting_title_colortheme),
-        value = options[current.value],
+        value = options[current],
         modifier = Modifier.clickable { showDialog = true },
     )
 
@@ -220,9 +259,9 @@ fun SettingCellColorTheme() {
         RadioButtonDialog(
             title = stringResource(id = R.string.setting_title_colortheme),
             options = options,
-            selected = current.value,
+            selected = current,
             onSelect = { selected ->
-                scope.launch { SettingColorTheme.set(selected, context) }
+                onChangeColorTheme(ColorThemeSetting.fromInt(selected))
                 showDialog = false
             }
         )
