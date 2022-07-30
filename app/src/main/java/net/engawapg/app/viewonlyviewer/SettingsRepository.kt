@@ -37,6 +37,8 @@ data class AppSettings(
     val ignoreFolderIds: Set<String>,
     val darkTheme: DarkThemeSetting,
     val colorTheme: ColorThemeSetting,
+    val tapCountToOpenSettings: Int,
+    val multiGoBack: Int,
 )
 
 class SettingsRepository(private val context: Context) {
@@ -44,6 +46,8 @@ class SettingsRepository(private val context: Context) {
         val IGNORE_FOLDERS = stringSetPreferencesKey("ignore_folders")
         val DARK_THEME = intPreferencesKey("DarkTheme")
         val COLOR_THEME = intPreferencesKey("ColorTheme")
+        val TAP_COUNT_TO_OPEN_SETTINGS = intPreferencesKey("TapCountToOpenSettings")
+        val MULTI_GO_BACK = intPreferencesKey("MultiGoBack")
     }
 
     val appSettingsFlow: Flow<AppSettings> = context.dataStore.data.map { preferences ->
@@ -54,11 +58,15 @@ class SettingsRepository(private val context: Context) {
         val colorTheme = preferences[PreferenceKeys.COLOR_THEME]?.let {
             ColorThemeSetting.fromInt(it)
         } ?: ColorThemeSetting.Wallpaper
+        val tapCountToOpenSettings = preferences[PreferenceKeys.TAP_COUNT_TO_OPEN_SETTINGS] ?: 1
+        val multiGoBack = preferences[PreferenceKeys.MULTI_GO_BACK] ?: 1
 
         AppSettings(
             ignoreFolderIds,
             darkTheme,
-            colorTheme
+            colorTheme,
+            tapCountToOpenSettings,
+            multiGoBack,
         )
     }
 
@@ -85,6 +93,18 @@ class SettingsRepository(private val context: Context) {
     suspend fun setColorTheme(colorTheme: ColorThemeSetting) {
         context.dataStore.edit { preferences ->
             preferences[PreferenceKeys.COLOR_THEME] = colorTheme.toInt()
+        }
+    }
+
+    suspend fun setTapCountToOpenSettings(tapCount: Int) {
+        context.dataStore.edit { preferences ->
+            preferences[PreferenceKeys.TAP_COUNT_TO_OPEN_SETTINGS] = tapCount
+        }
+    }
+
+    suspend fun setMultiGoBack(multiGoBack: Int) {
+        context.dataStore.edit { preferences ->
+            preferences[PreferenceKeys.MULTI_GO_BACK] = multiGoBack
         }
     }
 }

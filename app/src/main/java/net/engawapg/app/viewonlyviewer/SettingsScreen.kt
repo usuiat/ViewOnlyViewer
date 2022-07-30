@@ -16,7 +16,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.Dp
@@ -24,7 +23,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
-import kotlinx.coroutines.launch
 
 @Composable
 fun SettingsScreen(viewModel: SettingsViewModel = viewModel()) {
@@ -33,6 +31,8 @@ fun SettingsScreen(viewModel: SettingsViewModel = viewModel()) {
         uiState = uiState,
         onChangeDarkTheme = { darkTheme -> viewModel.setDarkTheme(darkTheme) },
         onChangeColorTheme = { colorTheme -> viewModel.setColorTheme(colorTheme) },
+        onChangeTapCountToOpenSettings = { tapCount -> viewModel.setTapCountToOpenSettings(tapCount) },
+        onChangeMultiGoBack = { multiGoBack -> viewModel.setMultiGoBack(multiGoBack) },
     )
 }
 
@@ -42,6 +42,8 @@ fun SettingsContent(
     uiState: SettingsUiState,
     onChangeDarkTheme: (DarkThemeSetting) -> Unit,
     onChangeColorTheme: (ColorThemeSetting) -> Unit,
+    onChangeTapCountToOpenSettings: (Int) -> Unit,
+    onChangeMultiGoBack: (Int) -> Unit,
 ) {
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(rememberTopAppBarScrollState())
     val statusBarColor = TopAppBarDefaults.centerAlignedTopAppBarColors()
@@ -79,6 +81,10 @@ fun SettingsContent(
                     onChangeDarkTheme = onChangeDarkTheme,
                     colorTheme = uiState.colorTheme!!,
                     onChangeColorTheme = onChangeColorTheme,
+                    tapCountToOpenSettings = uiState.tapCountToOpenSettings!!,
+                    onChangeTapCountToOpenSettings = onChangeTapCountToOpenSettings,
+                    multiGoBack = uiState.multiGoBack!!,
+                    onChangeMultiGoBack = onChangeMultiGoBack,
                 )
             }
         }
@@ -91,6 +97,10 @@ fun SettingsList(
     onChangeDarkTheme: (DarkThemeSetting) -> Unit,
     colorTheme: ColorThemeSetting,
     onChangeColorTheme: (ColorThemeSetting) -> Unit,
+    tapCountToOpenSettings: Int,
+    onChangeTapCountToOpenSettings: (Int) -> Unit,
+    multiGoBack: Int,
+    onChangeMultiGoBack: (Int) -> Unit,
 ) {
     LazyColumn(
         modifier = Modifier.fillMaxWidth()
@@ -99,8 +109,18 @@ fun SettingsList(
         item { SettingCellFolder() }
 
         item { SettingsHeader(title = stringResource(id = R.string.setting_header_childproof)) }
-        item { SettingCellTapCountToOpenSettings() }
-        item { SettingCellMultiGoBack() }
+        item {
+            SettingCellTapCountToOpenSettings(
+                tapCountToOpenSettings = tapCountToOpenSettings,
+                onChangeTapCountToOpenSettings = onChangeTapCountToOpenSettings,
+            )
+        }
+        item {
+            SettingCellMultiGoBack(
+                multiGoBack = multiGoBack,
+                onChangeMultiGoBack = onChangeMultiGoBack,
+            )
+        }
 
         item { SettingsHeader(title = stringResource(id = R.string.setting_header_theme)) }
         item {
@@ -134,10 +154,10 @@ fun SettingCellFolder() {
 }
 
 @Composable
-fun SettingCellTapCountToOpenSettings() {
-    val context = LocalContext.current
-    val tapCount = SettingTapCountToOpenSettings.getState(context)
-    val scope = rememberCoroutineScope()
+fun SettingCellTapCountToOpenSettings(
+    tapCountToOpenSettings: Int,
+    onChangeTapCountToOpenSettings: (Int) -> Unit,
+) {
     var showDialog by remember { mutableStateOf(false) }
 
     val options = listOf(
@@ -150,7 +170,7 @@ fun SettingCellTapCountToOpenSettings() {
 
     SettingItemCell(
         title = stringResource(id = R.string.setting_title_tap_count_to_open_settings),
-        value = options[tapCount.value - 1],
+        value = options[tapCountToOpenSettings - 1],
         modifier = Modifier.clickable { showDialog = true }
     )
 
@@ -159,9 +179,9 @@ fun SettingCellTapCountToOpenSettings() {
             title = stringResource(id = R.string.setting_title_tap_count_to_open_settings),
             text = stringResource(id = R.string.setting_desc_tap_count_to_open_settings),
             options = options,
-            selected = tapCount.value - 1,
+            selected = tapCountToOpenSettings - 1,
             onSelect = { selected ->
-                scope.launch { SettingTapCountToOpenSettings.set(selected + 1, context) }
+                onChangeTapCountToOpenSettings(selected + 1)
                 showDialog = false
             },
         )
@@ -169,11 +189,11 @@ fun SettingCellTapCountToOpenSettings() {
 }
 
 @Composable
-fun SettingCellMultiGoBack() {
-    val context = LocalContext.current
-    val num = SettingMultiGoBack.getState(context)
+fun SettingCellMultiGoBack(
+    multiGoBack: Int,
+    onChangeMultiGoBack: (Int) -> Unit,
+) {
     var showDialog by remember { mutableStateOf(false) }
-    val scope = rememberCoroutineScope()
 
     val options = listOf(
         stringResource(id = R.string.setting_value_multi_go_back_1),
@@ -185,7 +205,7 @@ fun SettingCellMultiGoBack() {
 
     SettingItemCell(
         title = stringResource(id = R.string.setting_title_multi_go_back),
-        value = options[num.value - 1],
+        value = options[multiGoBack - 1],
         modifier = Modifier.clickable { showDialog = true },
     )
 
@@ -194,9 +214,9 @@ fun SettingCellMultiGoBack() {
             title = stringResource(id = R.string.setting_title_multi_go_back),
             text = stringResource(id = R.string.setting_desc_multi_go_back),
             options = options,
-            selected = num.value - 1,
+            selected = multiGoBack - 1,
             onSelect = { selected ->
-                scope.launch { SettingMultiGoBack.set(selected + 1, context) }
+                onChangeMultiGoBack(selected + 1)
                 showDialog = false
             }
         )
