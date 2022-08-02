@@ -7,6 +7,7 @@ import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
 import androidx.compose.runtime.Stable
+import kotlinx.coroutines.flow.MutableStateFlow
 
 @Stable
 data class GalleryItem(val uri: Uri, val isVideo: Boolean)
@@ -22,6 +23,8 @@ data class FolderItem(
 class GalleryModel(private val context: Context) {
     private var _items = listOf<GalleryItem>()
     val items get() = _items
+
+    val galleryItemsFlow: MutableStateFlow<List<GalleryItem>> = MutableStateFlow(listOf())
 
     var folders = listOf<FolderItem>()
         private set
@@ -69,6 +72,8 @@ class GalleryModel(private val context: Context) {
         }
 
         _items = list
+
+        galleryItemsFlow.value = list
     }
 
     fun loadFolders() {

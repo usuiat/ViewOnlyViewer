@@ -14,7 +14,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.BlendMode
@@ -22,7 +21,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -47,10 +45,30 @@ private const val TIMEOUT_TO_CANCEL_ACTION_PER_TAP = 300L
 /* Time out (msec) to cancel invoking go back actions for each operation. */
 private const val TIMEOUT_TO_CANCEL_ACTION_PER_BACK = 500L
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun GalleryScreen(
     viewModel: GalleryViewModel = viewModel(),
+    onItemSelected: (Int)->Unit = {},
+    onEvent: (GalleryScreenEvent)->Unit = {},
+) {
+    val uiState by viewModel.uiState.collectAsState()
+    GalleryContent(
+        uiState = uiState,
+        onItemSelected = onItemSelected,
+        onEvent = onEvent,
+    )
+
+    ObserveLifecycleEvent { event ->
+        if (event == Lifecycle.Event.ON_RESUME) {
+            viewModel.loadGallery()
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun GalleryContent(
+    uiState: GalleryUiState,
     onItemSelected: (Int)->Unit = {},
     onEvent: (GalleryScreenEvent)->Unit = {},
 ) {
@@ -65,10 +83,6 @@ fun GalleryScreen(
 
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
-    val tapCount = SettingTapCountToOpenSettings.getState(LocalContext.current)
-    val backCount = SettingMultiGoBack.getState(LocalContext.current)
-    val failedMessage = stringResource(R.string.message_when_opening_settings_failed, tapCount.value)
-    val cancelGoBackMsg = stringResource(R.string.message_when_go_back_canceled, backCount.value)
 
     Scaffold(
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
@@ -77,22 +91,25 @@ fun GalleryScreen(
             CenterAlignedTopAppBar(
                 title = { Text(stringResource(R.string.app_name)) },
                 actions = {
-                    MultiTapIconButton(
-                        tapCount = tapCount.value,
-                        onTapComplete = { success ->
-                            if (success) {
-                                onEvent(GalleryScreenEvent.SelectSettings)
-                            } else {
-                                scope.launch {
-                                    snackbarHostState.showSnackbar(failedMessage)
+                    if (!uiState.loading) {
+                        val failedMessage = stringResource(R.string.message_when_opening_settings_failed, uiState.tapCountToOpenSettings!!)
+                        MultiTapIconButton(
+                            tapCount = uiState.tapCountToOpenSettings,
+                            onTapComplete = { success ->
+                                if (success) {
+                                    onEvent(GalleryScreenEvent.SelectSettings)
+                                } else {
+                                    scope.launch {
+                                        snackbarHostState.showSnackbar(failedMessage)
+                                    }
                                 }
                             }
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Settings,
+                                contentDescription = stringResource(id = R.string.desc_settings),
+                            )
                         }
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Settings,
-                            contentDescription = stringResource(id = R.string.desc_settings),
-                        )
                     }
                 },
                 scrollBehavior = scrollBehavior
@@ -100,21 +117,19 @@ fun GalleryScreen(
         }
     ) { innerPadding ->
         Box(Modifier.padding(innerPadding)) {
-            val items = viewModel.galleryItems.observeAsState(listOf())
-            Gallery(items, onItemSelected)
-        }
-    }
-
-    ObserveLifecycleEvent { event ->
-        if (event == Lifecycle.Event.ON_RESUME) {
-            viewModel.loadGallery()
+            if (!uiState.loading) {
+                Gallery(uiState.galleryItems!!, onItemSelected)
+            }
         }
     }
 
     // Multiple go back operation to exit app.
-    MultiGoBackHandler(backCount.value) {
-        scope.launch {
-            snackbarHostState.showSnackbar(cancelGoBackMsg)
+    if (!uiState.loading) {
+        val cancelGoBackMsg = stringResource(R.string.message_when_go_back_canceled, uiState.multiGoBack!!)
+        MultiGoBackHandler(uiState.multiGoBack) {
+            scope.launch {
+                snackbarHostState.showSnackbar(cancelGoBackMsg)
+            }
         }
     }
 }
@@ -149,10 +164,10 @@ fun MultiTapIconButton(
 }
 
 @Composable
-fun Gallery(items: State<List<GalleryItem>>, onItemSelected: (Int)->Unit = {}) {
-    if (items.value.isNotEmpty()) {
+fun Gallery(items: List<GalleryItem>, onItemSelected: (Int)->Unit = {}) {
+    if (items.isNotEmpty()) {
         LazyVerticalGrid(columns = GridCells.Fixed(COLUMN_NUM)) {
-            itemsIndexed(items.value) { index, item ->
+            itemsIndexed(items) { index, item ->
                 GalleryItem(item = item, onSelected = { onItemSelected(index) })
             }
         }
