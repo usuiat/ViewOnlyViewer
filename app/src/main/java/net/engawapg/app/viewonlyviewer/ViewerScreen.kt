@@ -10,7 +10,6 @@ import androidx.compose.material3.Slider
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
@@ -28,15 +27,24 @@ import com.google.accompanist.pager.rememberPagerState
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import kotlinx.coroutines.delay
 
-@OptIn(ExperimentalPagerApi::class)
 @Composable
 fun ViewerScreen(viewModel: ViewerViewModel = viewModel(), index: Int) {
+    val uiState by viewModel.uiState.collectAsState()
+    ViewerContent(
+        uiState = uiState,
+        index = index,
+    )
+}
+
+@OptIn(ExperimentalPagerApi::class)
+@Composable
+fun ViewerContent(uiState: ViewerUiState, index: Int) {
     val systemUiController = rememberSystemUiController()
     SideEffect {
         systemUiController.setStatusBarColor(Color.Black)
     }
 
-    val items: List<GalleryItem> by viewModel.galleryItems.observeAsState(listOf())
+    val items = uiState.galleryItems
     if (items.isNotEmpty()) {
         Surface(
             color = Color.Black,

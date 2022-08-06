@@ -21,9 +21,6 @@ data class FolderItem(
 )
 
 class GalleryModel(private val context: Context) {
-    private var _items = listOf<GalleryItem>()
-    val items get() = _items
-
     val galleryItemsFlow: MutableStateFlow<List<GalleryItem>> = MutableStateFlow(listOf())
 
     var folders = listOf<FolderItem>()
@@ -70,9 +67,6 @@ class GalleryModel(private val context: Context) {
 //                Log.d("GalleryModel", "$uri $isVideo")
             }
         }
-
-        _items = list
-
         galleryItemsFlow.value = list
     }
 
