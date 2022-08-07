@@ -8,7 +8,6 @@ import android.os.Bundle
 import android.provider.MediaStore
 import androidx.compose.runtime.Stable
 import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.MutableStateFlow
 
 @Stable
 data class GalleryItem(val uri: Uri, val isVideo: Boolean)
@@ -22,7 +21,7 @@ data class FolderItem(
 )
 
 class GalleryModel(private val context: Context) {
-    val galleryItemsFlow: MutableStateFlow<List<GalleryItem>> = MutableStateFlow(listOf())
+    val galleryItemsFlow = MutableSharedFlow<List<GalleryItem>>(replay = 1)
 
     fun load(ignoreFolderIds: Set<String> = setOf()) {
         val list = mutableListOf<GalleryItem>()
@@ -65,7 +64,7 @@ class GalleryModel(private val context: Context) {
 //                Log.d("GalleryModel", "$uri $isVideo")
             }
         }
-        galleryItemsFlow.value = list
+        galleryItemsFlow.tryEmit(list)
     }
 
     val folderItemsFlow = MutableSharedFlow<List<FolderItem>>(replay = 1)
