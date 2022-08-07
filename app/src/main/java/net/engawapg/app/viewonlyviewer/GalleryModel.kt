@@ -7,6 +7,7 @@ import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
 import androidx.compose.runtime.Stable
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 
 @Stable
@@ -22,9 +23,6 @@ data class FolderItem(
 
 class GalleryModel(private val context: Context) {
     val galleryItemsFlow: MutableStateFlow<List<GalleryItem>> = MutableStateFlow(listOf())
-
-    var folders = listOf<FolderItem>()
-        private set
 
     fun load(ignoreFolderIds: Set<String> = setOf()) {
         val list = mutableListOf<GalleryItem>()
@@ -69,6 +67,8 @@ class GalleryModel(private val context: Context) {
         }
         galleryItemsFlow.value = list
     }
+
+    val folderItemsFlow = MutableSharedFlow<List<FolderItem>>(replay = 1)
 
     fun loadFolders() {
         val ctx = context
@@ -131,6 +131,6 @@ class GalleryModel(private val context: Context) {
                 }
             }
         }
-        folders = list
+        folderItemsFlow.tryEmit(list)
     }
 }

@@ -9,6 +9,8 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
@@ -20,9 +22,23 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingFolderScreen(viewModel: SettingFolderViewModel = viewModel()) {
+    val uiState by viewModel.uiState.collectAsState()
+    SettingFolderContent(
+        uiState = uiState,
+        onChangeFolderVisibility = { folderId, visibility ->
+            viewModel.setFolderVisibility(folderId, visibility)
+        }
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun SettingFolderContent(
+    uiState: SettingFolderUiState,
+    onChangeFolderVisibility: (Int, Boolean) -> Unit,
+) {
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(rememberTopAppBarScrollState())
     val statusBarColor = TopAppBarDefaults.centerAlignedTopAppBarColors()
         .containerColor(scrollFraction = scrollBehavior.scrollFraction).value
@@ -53,14 +69,15 @@ fun SettingFolderScreen(viewModel: SettingFolderViewModel = viewModel()) {
         }
     ) { innerPadding ->
         LazyColumn(contentPadding = innerPadding) {
-            item { SettingFolderDescription() }
-            items(viewModel.folders) { folder ->
-                SettingFolderCell(
-                    folder = folder,
-                    onCheckedChange = { checked ->
-                        viewModel.setFolderVisibility(folder, checked)
+            if (uiState is SettingFolderUiState.Loaded) {
+                item { SettingFolderDescription() }
+                items(uiState.settingFolderItems) { folder ->
+                    SettingFolderCell(
+                        folder = folder
+                    ) { checked ->
+                        onChangeFolderVisibility(folder.id, checked)
                     }
-                )
+                }
             }
         }
     }
