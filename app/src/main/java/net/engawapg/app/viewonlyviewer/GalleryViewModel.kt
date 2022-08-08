@@ -8,21 +8,15 @@ import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.get
 
-data class GalleryUiState(
-    val loading: Boolean,
-    /* The following properties are used only when loading is false. */
-    val galleryItems: List<GalleryItem>?,
-    val tapCountToOpenSettings: Int?,
-    val multiGoBack: Int?,
-)
+sealed interface GalleryUiState {
+    object Loading: GalleryUiState
 
-private val GalleryUiStateDefault = GalleryUiState(
-    loading = true,
-    /* The following properties are used only when loading is false. */
-    galleryItems = null,
-    tapCountToOpenSettings = null,
-    multiGoBack = null,
-)
+    data class Success(
+        val galleryItems: List<GalleryItem>,
+        val tapCountToOpenSettings: Int,
+        val multiGoBack: Int,
+    ): GalleryUiState
+}
 
 class GalleryViewModel: ViewModel(), KoinComponent {
     private val model: GalleryModel = get()
@@ -42,8 +36,7 @@ class GalleryViewModel: ViewModel(), KoinComponent {
         appSettingsStream,
         model.galleryItemsFlow,
     ) { appSettings, items ->
-        GalleryUiState(
-            loading = false,
+        GalleryUiState.Success(
             galleryItems = items,
             tapCountToOpenSettings = appSettings.tapCountToOpenSettings,
             multiGoBack = appSettings.multiGoBack,
@@ -51,7 +44,7 @@ class GalleryViewModel: ViewModel(), KoinComponent {
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5000),
-        initialValue = GalleryUiStateDefault
+        initialValue = GalleryUiState.Loading
     )
 
     fun loadGallery() {

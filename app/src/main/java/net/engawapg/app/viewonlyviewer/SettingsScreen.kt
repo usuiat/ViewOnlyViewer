@@ -75,15 +75,15 @@ fun SettingsContent(
         }
     ) { innerPadding ->
         Box(Modifier.padding(innerPadding)) {
-            if (!uiState.loading) {
+            if (uiState is SettingsUiState.Success) {
                 SettingsList(
-                    darkTheme = uiState.darkTheme!!,
+                    darkTheme = uiState.darkTheme,
                     onChangeDarkTheme = onChangeDarkTheme,
-                    colorTheme = uiState.colorTheme!!,
+                    colorTheme = uiState.colorTheme,
                     onChangeColorTheme = onChangeColorTheme,
-                    tapCountToOpenSettings = uiState.tapCountToOpenSettings!!,
+                    tapCountToOpenSettings = uiState.tapCountToOpenSettings,
                     onChangeTapCountToOpenSettings = onChangeTapCountToOpenSettings,
-                    multiGoBack = uiState.multiGoBack!!,
+                    multiGoBack = uiState.multiGoBack,
                     onChangeMultiGoBack = onChangeMultiGoBack,
                 )
             }

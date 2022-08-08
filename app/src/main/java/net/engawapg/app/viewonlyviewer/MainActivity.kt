@@ -45,21 +45,23 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun AppScreen(uiState: MainUiState) {
-    if (uiState.loading) {
-        /* Set status bar color to transparent until theme settings are loaded */
-        val systemUiController = rememberSystemUiController()
-        systemUiController.setStatusBarColor(Color.Transparent)
-    }
-    else {
-        val isDark = when (uiState.darkTheme) {
-            DarkThemeSetting.Off -> false
-            DarkThemeSetting.On -> true
-            DarkThemeSetting.UseSystemSettings -> isSystemInDarkTheme()
+    when (uiState) {
+        is MainUiState.Loading -> {
+            /* Set status bar color to transparent until theme settings are loaded */
+            val systemUiController = rememberSystemUiController()
+            systemUiController.setStatusBarColor(Color.Transparent)
         }
-        val isDynamicColor = uiState.colorTheme == ColorThemeSetting.Wallpaper
-        ViewOnlyViewerTheme(isDark, isDynamicColor) {
-            Surface(color = MaterialTheme.colorScheme.background) {
-                AppContent()
+        is MainUiState.Success -> {
+            val isDark = when (uiState.darkTheme) {
+                DarkThemeSetting.Off -> false
+                DarkThemeSetting.On -> true
+                DarkThemeSetting.UseSystemSettings -> isSystemInDarkTheme()
+            }
+            val isDynamicColor = uiState.colorTheme == ColorThemeSetting.Wallpaper
+            ViewOnlyViewerTheme(isDark, isDynamicColor) {
+                Surface(color = MaterialTheme.colorScheme.background) {
+                    AppContent()
+                }
             }
         }
     }

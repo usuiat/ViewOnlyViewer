@@ -91,8 +91,8 @@ fun GalleryContent(
             CenterAlignedTopAppBar(
                 title = { Text(stringResource(R.string.app_name)) },
                 actions = {
-                    if (!uiState.loading) {
-                        val failedMessage = stringResource(R.string.message_when_opening_settings_failed, uiState.tapCountToOpenSettings!!)
+                    if (uiState is GalleryUiState.Success) {
+                        val failedMessage = stringResource(R.string.message_when_opening_settings_failed, uiState.tapCountToOpenSettings)
                         MultiTapIconButton(
                             tapCount = uiState.tapCountToOpenSettings,
                             onTapComplete = { success ->
@@ -117,15 +117,15 @@ fun GalleryContent(
         }
     ) { innerPadding ->
         Box(Modifier.padding(innerPadding)) {
-            if (!uiState.loading) {
-                Gallery(uiState.galleryItems!!, onItemSelected)
+            if (uiState is GalleryUiState.Success) {
+                Gallery(uiState.galleryItems, onItemSelected)
             }
         }
     }
 
     // Multiple go back operation to exit app.
-    if (!uiState.loading) {
-        val cancelGoBackMsg = stringResource(R.string.message_when_go_back_canceled, uiState.multiGoBack!!)
+    if (uiState is GalleryUiState.Success) {
+        val cancelGoBackMsg = stringResource(R.string.message_when_go_back_canceled, uiState.multiGoBack)
         MultiGoBackHandler(uiState.multiGoBack) {
             scope.launch {
                 snackbarHostState.showSnackbar(cancelGoBackMsg)

@@ -10,29 +10,22 @@ import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.get
 
-data class SettingsUiState(
-    val loading: Boolean,
-    val darkTheme: DarkThemeSetting?,
-    val colorTheme: ColorThemeSetting?,
-    val tapCountToOpenSettings: Int?,
-    val multiGoBack: Int?,
-)
+sealed interface SettingsUiState {
+    object Loading: SettingsUiState
 
-private val SettingsUiStateDefault = SettingsUiState(
-    loading = true,
-    /* The following values are not used when loading. */
-    darkTheme = null,
-    colorTheme = null,
-    tapCountToOpenSettings = null,
-    multiGoBack = null,
-)
+    data class Success(
+        val darkTheme: DarkThemeSetting,
+        val colorTheme: ColorThemeSetting,
+        val tapCountToOpenSettings: Int,
+        val multiGoBack: Int,
+    ): SettingsUiState
+}
 
 class SettingsViewModel: ViewModel(), KoinComponent {
     private val settingsRepo: SettingsRepository = get()
 
     val uiState: StateFlow<SettingsUiState> = settingsRepo.appSettingsFlow.map { appSettings ->
-        SettingsUiState(
-            loading = false,
+        SettingsUiState.Success(
             darkTheme = appSettings.darkTheme,
             colorTheme = appSettings.colorTheme,
             tapCountToOpenSettings = appSettings.tapCountToOpenSettings,
@@ -41,7 +34,7 @@ class SettingsViewModel: ViewModel(), KoinComponent {
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5000),
-        initialValue = SettingsUiStateDefault
+        initialValue = SettingsUiState.Loading
     )
 
     fun setDarkTheme(darkTheme: DarkThemeSetting) {
