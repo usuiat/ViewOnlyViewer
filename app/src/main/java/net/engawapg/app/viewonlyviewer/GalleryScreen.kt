@@ -73,8 +73,15 @@ fun GalleryContent(
     onEvent: (GalleryScreenEvent)->Unit = {},
 ) {
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarScrollState())
+
+    /* To prevent recomposition every time scrolled */
+    val scrollFraction by remember {
+        derivedStateOf {
+            scrollBehavior.scrollFraction
+        }
+    }
     val statusBarColor = TopAppBarDefaults.centerAlignedTopAppBarColors()
-        .containerColor(scrollFraction = scrollBehavior.scrollFraction).value
+            .containerColor(scrollFraction = scrollFraction).value
     val systemUiController = rememberSystemUiController()
 
     SideEffect {
