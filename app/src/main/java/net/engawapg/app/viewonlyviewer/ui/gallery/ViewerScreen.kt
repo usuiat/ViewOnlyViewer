@@ -144,7 +144,7 @@ fun VideoController(
     }
 
     val durMin = (duration / 60000).toString()
-    val durSec = ((duration / 1000) % 60000).toString().padStart(2, '0')
+    val durSec = ((duration / 1000) % 60).toString().padStart(2, '0')
     val curMin = (curPos / 60000).toString()
     val curSec = ((curPos / 1000) % 60).toString().padStart(2, '0')
 
