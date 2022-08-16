@@ -1,4 +1,4 @@
-package net.engawapg.app.viewonlyviewer
+package net.engawapg.app.viewonlyviewer.data
 
 import android.content.ContentResolver
 import android.content.ContentUris

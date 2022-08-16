@@ -1,4 +1,4 @@
-package net.engawapg.app.viewonlyviewer
+package net.engawapg.app.viewonlyviewer.util
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect

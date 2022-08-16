@@ -1,4 +1,4 @@
-package net.engawapg.app.viewonlyviewer
+package net.engawapg.app.viewonlyviewer.ui.settings
 
 import android.net.Uri
 import androidx.compose.runtime.Stable
@@ -10,6 +10,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import net.engawapg.app.viewonlyviewer.data.GalleryModel
+import net.engawapg.app.viewonlyviewer.data.SettingsRepository
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.get
 

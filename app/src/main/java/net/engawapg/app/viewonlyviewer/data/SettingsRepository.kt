@@ -1,4 +1,4 @@
-package net.engawapg.app.viewonlyviewer
+package net.engawapg.app.viewonlyviewer.data
 
 import android.content.Context
 import androidx.datastore.core.DataStore

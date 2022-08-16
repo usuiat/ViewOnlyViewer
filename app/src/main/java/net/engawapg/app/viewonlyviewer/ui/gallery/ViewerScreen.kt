@@ -1,4 +1,4 @@
-package net.engawapg.app.viewonlyviewer
+package net.engawapg.app.viewonlyviewer.ui.gallery
 
 import android.media.MediaPlayer
 import android.widget.VideoView
@@ -26,6 +26,8 @@ import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.rememberPagerState
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import kotlinx.coroutines.delay
+import net.engawapg.app.viewonlyviewer.data.GalleryItem
+import net.engawapg.app.viewonlyviewer.R
 
 @Composable
 fun ViewerScreen(viewModel: ViewerViewModel = viewModel(), index: Int) {

@@ -4,8 +4,9 @@ import android.app.Application
 import coil.ImageLoader
 import coil.ImageLoaderFactory
 import coil.decode.VideoFrameDecoder
+import net.engawapg.app.viewonlyviewer.data.GalleryModel
+import net.engawapg.app.viewonlyviewer.data.SettingsRepository
 import org.koin.android.ext.koin.androidContext
-import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.core.context.startKoin
 import org.koin.dsl.module
 

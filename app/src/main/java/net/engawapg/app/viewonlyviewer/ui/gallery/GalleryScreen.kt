@@ -1,4 +1,4 @@
-package net.engawapg.app.viewonlyviewer
+package net.engawapg.app.viewonlyviewer.ui.gallery
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Image
@@ -33,6 +33,9 @@ import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import net.engawapg.app.viewonlyviewer.data.GalleryItem
+import net.engawapg.app.viewonlyviewer.util.ObserveLifecycleEvent
+import net.engawapg.app.viewonlyviewer.R
 
 enum class GalleryScreenEvent {
     SelectSettings

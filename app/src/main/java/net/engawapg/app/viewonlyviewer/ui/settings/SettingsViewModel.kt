@@ -1,4 +1,4 @@
-package net.engawapg.app.viewonlyviewer
+package net.engawapg.app.viewonlyviewer.ui.settings
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -7,6 +7,9 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import net.engawapg.app.viewonlyviewer.data.ColorThemeSetting
+import net.engawapg.app.viewonlyviewer.data.DarkThemeSetting
+import net.engawapg.app.viewonlyviewer.data.SettingsRepository
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.get
 

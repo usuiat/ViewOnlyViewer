@@ -1,4 +1,4 @@
-package net.engawapg.app.viewonlyviewer
+package net.engawapg.app.viewonlyviewer.ui.settings
 
 import android.os.Build
 import androidx.compose.foundation.clickable
@@ -23,6 +23,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
+import net.engawapg.app.viewonlyviewer.*
+import net.engawapg.app.viewonlyviewer.R
+import net.engawapg.app.viewonlyviewer.data.ColorThemeSetting
+import net.engawapg.app.viewonlyviewer.data.DarkThemeSetting
 
 @Composable
 fun SettingsScreen(viewModel: SettingsViewModel = viewModel()) {

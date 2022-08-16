@@ -1,4 +1,4 @@
-package net.engawapg.app.viewonlyviewer
+package net.engawapg.app.viewonlyviewer.ui.settings
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -21,6 +21,8 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
+import net.engawapg.app.viewonlyviewer.LocalNavController
+import net.engawapg.app.viewonlyviewer.R
 
 @Composable
 fun SettingFolderScreen(viewModel: SettingFolderViewModel = viewModel()) {

@@ -6,6 +6,9 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import net.engawapg.app.viewonlyviewer.data.ColorThemeSetting
+import net.engawapg.app.viewonlyviewer.data.DarkThemeSetting
+import net.engawapg.app.viewonlyviewer.data.SettingsRepository
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.get
 

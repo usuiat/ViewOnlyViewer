@@ -29,6 +29,13 @@ import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
 import com.google.accompanist.permissions.shouldShowRationale
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
+import net.engawapg.app.viewonlyviewer.data.ColorThemeSetting
+import net.engawapg.app.viewonlyviewer.data.DarkThemeSetting
+import net.engawapg.app.viewonlyviewer.ui.gallery.ViewerScreen
+import net.engawapg.app.viewonlyviewer.ui.gallery.GalleryScreen
+import net.engawapg.app.viewonlyviewer.ui.gallery.GalleryScreenEvent
+import net.engawapg.app.viewonlyviewer.ui.settings.SettingFolderScreen
+import net.engawapg.app.viewonlyviewer.ui.settings.SettingsScreen
 import net.engawapg.app.viewonlyviewer.ui.theme.ViewOnlyViewerTheme
 
 class MainActivity : ComponentActivity() {

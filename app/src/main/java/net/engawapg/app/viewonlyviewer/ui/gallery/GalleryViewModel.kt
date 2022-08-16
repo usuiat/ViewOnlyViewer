@@ -1,10 +1,13 @@
-package net.engawapg.app.viewonlyviewer
+package net.engawapg.app.viewonlyviewer.ui.gallery
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import net.engawapg.app.viewonlyviewer.data.GalleryItem
+import net.engawapg.app.viewonlyviewer.data.GalleryModel
+import net.engawapg.app.viewonlyviewer.data.SettingsRepository
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.get
 
