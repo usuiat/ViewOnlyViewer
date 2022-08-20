@@ -49,9 +49,17 @@ fun SettingsContent(
     onChangeTapCountToOpenSettings: (Int) -> Unit,
     onChangeMultiGoBack: (Int) -> Unit,
 ) {
-    val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(rememberTopAppBarScrollState())
+    val topAppBarState = rememberTopAppBarState()
+    val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(topAppBarState)
+
+    /* To prevent recomposition every time scrolled */
+    val scrollFraction by remember {
+        derivedStateOf {
+            topAppBarState.overlappedFraction
+        }
+    }
     val statusBarColor = TopAppBarDefaults.centerAlignedTopAppBarColors()
-        .containerColor(scrollFraction = scrollBehavior.scrollFraction).value
+        .containerColor(colorTransitionFraction = scrollFraction).value
     val systemUiController = rememberSystemUiController()
 
     SideEffect {
@@ -358,7 +366,7 @@ fun SettingItemCell(
     }
 }
 
-@OptIn(ExperimentalComposeUiApi::class, ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun RadioButtonDialog(
     title: String,

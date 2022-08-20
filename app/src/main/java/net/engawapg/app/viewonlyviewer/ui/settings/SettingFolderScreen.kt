@@ -7,10 +7,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.SideEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
@@ -41,9 +38,17 @@ fun SettingFolderContent(
     uiState: SettingFolderUiState,
     onChangeFolderVisibility: (Int, Boolean) -> Unit,
 ) {
-    val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(rememberTopAppBarScrollState())
+    val topAppBarState = rememberTopAppBarState()
+    val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(topAppBarState)
+
+    /* To prevent recomposition every time scrolled */
+    val scrollFraction by remember {
+        derivedStateOf {
+            topAppBarState.overlappedFraction
+        }
+    }
     val statusBarColor = TopAppBarDefaults.centerAlignedTopAppBarColors()
-        .containerColor(scrollFraction = scrollBehavior.scrollFraction).value
+        .containerColor(colorTransitionFraction = scrollFraction).value
     val systemUiController = rememberSystemUiController()
 
     SideEffect {
@@ -99,7 +104,6 @@ fun SettingFolderDescription() {
     )
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingFolderCell(folder: SettingFolderItem, onCheckedChange: (Boolean) -> Unit) {
     Column {
