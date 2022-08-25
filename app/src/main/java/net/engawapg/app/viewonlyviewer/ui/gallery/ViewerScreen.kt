@@ -15,6 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -26,8 +27,10 @@ import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.rememberPagerState
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import kotlinx.coroutines.delay
-import net.engawapg.app.viewonlyviewer.data.GalleryItem
 import net.engawapg.app.viewonlyviewer.R
+import net.engawapg.app.viewonlyviewer.data.GalleryItem
+import net.engawapg.app.viewonlyviewer.util.disableFullScreen
+import net.engawapg.app.viewonlyviewer.util.enableFullScreen
 
 @Composable
 fun ViewerScreen(viewModel: ViewerViewModel = viewModel(), index: Int) {
@@ -43,14 +46,25 @@ fun ViewerScreen(viewModel: ViewerViewModel = viewModel(), index: Int) {
 fun ViewerContent(uiState: ViewerUiState, index: Int) {
     val systemUiController = rememberSystemUiController()
     SideEffect {
-        systemUiController.setStatusBarColor(Color.Black)
+        /* Same color as shown by system when we swipe */
+        systemUiController.setStatusBarColor(Color(0x70000000))
     }
 
+    val context = LocalContext.current
+    var isFullScreen by remember { mutableStateOf(false) }
     val items = uiState.galleryItems
     if (items.isNotEmpty()) {
         Surface(
             color = Color.Black,
-            contentColor = Color.White
+            contentColor = Color.White,
+            modifier = Modifier.clickable {
+                if (isFullScreen) {
+                    disableFullScreen(context)
+                } else {
+                    enableFullScreen(context)
+                }
+                isFullScreen = !isFullScreen
+            }
         ) {
             val pagerState = rememberPagerState(initialPage = index)
 

@@ -4,9 +4,7 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.aspectRatio
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.itemsIndexed
@@ -21,6 +19,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -33,9 +32,10 @@ import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import net.engawapg.app.viewonlyviewer.R
 import net.engawapg.app.viewonlyviewer.data.GalleryItem
 import net.engawapg.app.viewonlyviewer.util.ObserveLifecycleEvent
-import net.engawapg.app.viewonlyviewer.R
+import net.engawapg.app.viewonlyviewer.util.disableFullScreen
 
 enum class GalleryScreenEvent {
     SelectSettings
@@ -65,6 +65,12 @@ fun GalleryScreen(
         if (event == Lifecycle.Event.ON_RESUME) {
             viewModel.loadGallery()
         }
+    }
+
+    /* For when returning from ViewerScreen */
+    val context = LocalContext.current
+    LaunchedEffect(true) {
+        disableFullScreen(context)
     }
 }
 
@@ -97,7 +103,9 @@ fun GalleryContent(
 
     Scaffold(
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
-        modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
+        modifier = Modifier
+            .nestedScroll(scrollBehavior.nestedScrollConnection)
+            .safeDrawingPadding(),
         topBar = {
             CenterAlignedTopAppBar(
                 title = { Text(stringResource(R.string.app_name)) },
