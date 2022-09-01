@@ -40,4 +40,6 @@
     <string name="setting_header_display">Display</string>
     <string name="setting_title_folder">Folder</string>
     <string name="setting_desc_folder">Select folders to display.</string>
+    <string name="setting_title_privacy_policy">Privacy Policy</string>
+    <string name="setting_value_open_in_browser">Open in Browser</string>
 </resources>
