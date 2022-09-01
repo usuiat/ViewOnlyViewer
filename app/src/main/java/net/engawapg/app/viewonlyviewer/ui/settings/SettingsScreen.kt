@@ -1,5 +1,7 @@
 package net.engawapg.app.viewonlyviewer.ui.settings
 
+import android.content.Intent
+import android.net.Uri
 import android.os.Build
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -16,6 +18,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.Dp
@@ -27,6 +30,9 @@ import net.engawapg.app.viewonlyviewer.*
 import net.engawapg.app.viewonlyviewer.R
 import net.engawapg.app.viewonlyviewer.data.ColorThemeSetting
 import net.engawapg.app.viewonlyviewer.data.DarkThemeSetting
+import net.engawapg.app.viewonlyviewer.util.findActivity
+
+private const val URL_PRIVACY_POLICY = "https://engawapg.net/software/viewonlyviewer/viewonlyviewer-privacy-policy/"
 
 @Composable
 fun SettingsScreen(viewModel: SettingsViewModel = viewModel()) {
@@ -154,6 +160,7 @@ fun SettingsList(
 
         item { SettingsHeader(title = stringResource(id = R.string.setting_header_about)) }
         item { SettingCellVersion() }
+        item { SettingPrivacyPolicy() }
     }
 }
 
@@ -307,6 +314,19 @@ fun SettingCellVersion() {
     SettingItemCell(
         title = stringResource(id = R.string.setting_title_version),
         value = BuildConfig.VERSION_NAME,
+    )
+}
+
+@Composable
+fun SettingPrivacyPolicy() {
+    val activity = LocalContext.current.findActivity()
+    SettingItemCell(
+        title = stringResource(id = R.string.setting_title_privacy_policy),
+        value = stringResource(id = R.string.setting_value_open_in_browser),
+        modifier = Modifier.clickable {
+            val webIntent = Intent(Intent.ACTION_VIEW, Uri.parse(URL_PRIVACY_POLICY))
+            activity.startActivity(webIntent)
+        }
     )
 }
 

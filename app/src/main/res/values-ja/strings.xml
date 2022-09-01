@@ -41,4 +41,6 @@
     <string name="setting_header_display">表示</string>
     <string name="setting_title_folder">フォルダ</string>
     <string name="setting_desc_folder">表示するフォルダを選択します。</string>
+    <string name="setting_title_privacy_policy">プライバシーポリシー</string>
+    <string name="setting_value_open_in_browser">ブラウザで開く</string>
 </resources>
