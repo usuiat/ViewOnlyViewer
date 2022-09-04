@@ -4,6 +4,7 @@ import android.media.MediaPlayer
 import android.widget.VideoView
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Slider
@@ -57,7 +58,10 @@ fun ViewerContent(uiState: ViewerUiState, index: Int) {
         Surface(
             color = Color.Black,
             contentColor = Color.White,
-            modifier = Modifier.clickable {
+            modifier = Modifier.clickable(
+                interactionSource = remember { MutableInteractionSource() },
+                indication = null,  // Disable ripple effect
+            ) {
                 if (isFullScreen) {
                     disableFullScreen(context)
                 } else {
