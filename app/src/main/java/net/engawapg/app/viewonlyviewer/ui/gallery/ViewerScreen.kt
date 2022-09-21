@@ -48,7 +48,7 @@ fun ViewerContent(uiState: ViewerUiState, index: Int) {
     val systemUiController = rememberSystemUiController()
     SideEffect {
         /* Same color as shown by system when we swipe */
-        systemUiController.setStatusBarColor(Color(0x70000000))
+        systemUiController.setSystemBarsColor(Color(0x70000000))
     }
 
     val context = LocalContext.current
