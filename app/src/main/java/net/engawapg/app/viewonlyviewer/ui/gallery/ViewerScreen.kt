@@ -33,6 +33,8 @@ import net.engawapg.app.viewonlyviewer.data.GalleryItem
 import net.engawapg.app.viewonlyviewer.util.disableFullScreen
 import net.engawapg.app.viewonlyviewer.util.enableFullScreen
 
+private val ViewerScreenBarColor = Color(0x70000000)
+
 @Composable
 fun ViewerScreen(viewModel: ViewerViewModel = viewModel(), index: Int) {
     val uiState by viewModel.uiState.collectAsState()
@@ -48,7 +50,7 @@ fun ViewerContent(uiState: ViewerUiState, index: Int) {
     val systemUiController = rememberSystemUiController()
     SideEffect {
         /* Same color as shown by system when we swipe */
-        systemUiController.setSystemBarsColor(Color(0x70000000))
+        systemUiController.setSystemBarsColor(ViewerScreenBarColor)
     }
 
     val context = LocalContext.current
@@ -175,7 +177,7 @@ fun VideoController(
 
     Column(
         modifier = modifier
-            .background(Brush.verticalGradient(listOf(Color.Transparent, Color(0x80000000)))),
+            .background(Brush.verticalGradient(listOf(Color.Transparent, ViewerScreenBarColor))),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Icon(
@@ -190,6 +192,7 @@ fun VideoController(
         )
         Row(
             verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.safeDrawingPadding()
         ) {
             Text ( // Current Position
                 text = "$curMin:$curSec",
