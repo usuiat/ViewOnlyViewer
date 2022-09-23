@@ -6,10 +6,9 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
-import androidx.compose.material3.Icon
-import androidx.compose.material3.Slider
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -28,6 +27,7 @@ import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.rememberPagerState
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import kotlinx.coroutines.delay
+import net.engawapg.app.viewonlyviewer.LocalNavController
 import net.engawapg.app.viewonlyviewer.R
 import net.engawapg.app.viewonlyviewer.data.GalleryItem
 import net.engawapg.app.viewonlyviewer.util.disableFullScreen
@@ -72,17 +72,34 @@ fun ViewerContent(uiState: ViewerUiState, index: Int) {
                 isFullScreen = !isFullScreen
             }
         ) {
-            val pagerState = rememberPagerState(initialPage = index)
+            Box(
+                modifier = Modifier.fillMaxSize()
+            ) {
+                val pagerState = rememberPagerState(initialPage = index)
+                HorizontalPager(
+                    count = items.size,
+                    state = pagerState,
+                    modifier = Modifier.fillMaxSize(),
+                    itemSpacing = 10.dp
+                ) { pageIndex ->
+                    Viewer(
+                        item = items[pageIndex],
+                        isCurrentPage = (pagerState.currentPage == pageIndex)
+                    )
+                }
 
-            HorizontalPager(
-                count = items.size,
-                state = pagerState,
-                itemSpacing = 10.dp
-            ) { pageIndex ->
-                Viewer(
-                    item = items[pageIndex],
-                    isCurrentPage = (pagerState.currentPage == pageIndex)
-                )
+                val navController = LocalNavController.current
+                IconButton(
+                    modifier = Modifier
+                        .safeDrawingPadding()
+                        .align(Alignment.TopStart),
+                    onClick = { navController.navigateUp() }
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.ArrowBack,
+                        contentDescription = stringResource(id = R.string.desc_back)
+                    )
+                }
             }
         }
     }
