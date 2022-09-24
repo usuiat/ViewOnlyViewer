@@ -55,6 +55,7 @@ fun ViewerContent(uiState: ViewerUiState, index: Int) {
 
     val context = LocalContext.current
     var isFullScreen by remember { mutableStateOf(false) }
+    var showControllers by remember { mutableStateOf(true) }
     val items = uiState.galleryItems
     if (items.isNotEmpty()) {
         Surface(
@@ -70,6 +71,7 @@ fun ViewerContent(uiState: ViewerUiState, index: Int) {
                     enableFullScreen(context)
                 }
                 isFullScreen = !isFullScreen
+                showControllers = !showControllers
             }
         ) {
             Box(
@@ -84,21 +86,24 @@ fun ViewerContent(uiState: ViewerUiState, index: Int) {
                 ) { pageIndex ->
                     Viewer(
                         item = items[pageIndex],
-                        isCurrentPage = (pagerState.currentPage == pageIndex)
+                        isCurrentPage = (pagerState.currentPage == pageIndex),
+                        showControllers = showControllers,
                     )
                 }
 
-                val navController = LocalNavController.current
-                IconButton(
-                    modifier = Modifier
-                        .safeDrawingPadding()
-                        .align(Alignment.TopStart),
-                    onClick = { navController.navigateUp() }
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.ArrowBack,
-                        contentDescription = stringResource(id = R.string.desc_back)
-                    )
+                if (showControllers) {
+                    val navController = LocalNavController.current
+                    IconButton(
+                        modifier = Modifier
+                            .safeDrawingPadding()
+                            .align(Alignment.TopStart),
+                        onClick = { navController.navigateUp() }
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.ArrowBack,
+                            contentDescription = stringResource(id = R.string.desc_back)
+                        )
+                    }
                 }
             }
         }
@@ -106,13 +111,14 @@ fun ViewerContent(uiState: ViewerUiState, index: Int) {
 }
 
 @Composable
-fun Viewer(item: GalleryItem, isCurrentPage: Boolean) {
+fun Viewer(item: GalleryItem, isCurrentPage: Boolean, showControllers: Boolean) {
     if (item.isVideo) {
         Box(modifier = Modifier.fillMaxSize()) {
             var isVideoRendering by remember { mutableStateOf(false) }
             if (isCurrentPage) {
                 VideoPlayer(
                     item = item,
+                    showControllers = showControllers,
                     onVideoRendering = { isVideoRendering = it },
                 )
             }
@@ -136,7 +142,7 @@ fun ImageViewer(item: GalleryItem) {
 }
 
 @Composable
-fun VideoPlayer(item: GalleryItem, onVideoRendering: (Boolean)->Unit) {
+fun VideoPlayer(item: GalleryItem, showControllers: Boolean, onVideoRendering: (Boolean)->Unit) {
     var mediaPlayer: MediaPlayer? by remember { mutableStateOf(null) }
     Box(modifier = Modifier.fillMaxSize()) {
         AndroidView(
@@ -157,10 +163,12 @@ fun VideoPlayer(item: GalleryItem, onVideoRendering: (Boolean)->Unit) {
                 }
             },
         )
-        VideoController(
-            mediaPlayer = mediaPlayer,
-            modifier = Modifier.align(Alignment.BottomCenter)
-        )
+        if (showControllers) {
+            VideoController(
+                mediaPlayer = mediaPlayer,
+                modifier = Modifier.align(Alignment.BottomCenter)
+            )
+        }
     }
 }
 
