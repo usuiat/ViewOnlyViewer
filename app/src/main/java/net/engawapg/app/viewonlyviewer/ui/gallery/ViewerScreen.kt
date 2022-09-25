@@ -9,6 +9,8 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Pause
+import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -16,7 +18,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
@@ -217,16 +218,23 @@ fun VideoController(
         modifier = modifier,
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        Icon(
-            painter = painterResource(if (isVideoPlaying) R.drawable.pause else R.drawable.play),
-            contentDescription = stringResource(id = R.string.desc_playpause),
+        val icon = if (isVideoPlaying) Icons.Default.Pause else Icons.Default.PlayArrow
+        IconButton(
+            onClick = {
+                if (isVideoPlaying) mediaPlayer?.pause() else mediaPlayer?.start()
+            },
             modifier = Modifier
-                .padding(20.dp)
-                .clickable {
-                    if (isVideoPlaying) mediaPlayer?.pause() else mediaPlayer?.start()
-                },
-            tint = Color.Unspecified
-        )
+                .align(Alignment.Start)
+                .padding(12.dp)
+        ) {
+            Icon(
+                imageVector = icon,
+                contentDescription = stringResource(id = R.string.desc_playpause),
+                modifier = Modifier
+                    .background(color = ViewerScreenBarColor, shape = CircleShape)
+                    .padding(8.dp)
+            )
+        }
         Row(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
