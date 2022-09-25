@@ -6,13 +6,13 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -50,7 +50,7 @@ fun ViewerContent(uiState: ViewerUiState, index: Int) {
     val systemUiController = rememberSystemUiController()
     SideEffect {
         /* Same color as shown by system when we swipe */
-        systemUiController.setSystemBarsColor(ViewerScreenBarColor)
+        systemUiController.setSystemBarsColor(Color.Transparent)
     }
 
     val context = LocalContext.current
@@ -96,13 +96,26 @@ fun ViewerContent(uiState: ViewerUiState, index: Int) {
                     IconButton(
                         modifier = Modifier
                             .safeDrawingPadding()
-                            .align(Alignment.TopStart),
+                            .padding(12.dp),
                         onClick = { navController.navigateUp() }
                     ) {
                         Icon(
                             imageVector = Icons.Default.ArrowBack,
-                            contentDescription = stringResource(id = R.string.desc_back)
+                            contentDescription = stringResource(id = R.string.desc_back),
+                            modifier = Modifier
+                                .background(color = ViewerScreenBarColor, shape = CircleShape)
+                                .padding(8.dp),
                         )
+                    }
+
+                    Box(
+                        modifier = Modifier
+                            .background(ViewerScreenBarColor)
+                            .statusBarsPadding()
+                            .fillMaxWidth()
+                            .height(0.dp)
+                    ) {
+                        // This is a dummy Box to make the status bar visible.
                     }
                 }
             }
@@ -201,8 +214,7 @@ fun VideoController(
     }
 
     Column(
-        modifier = modifier
-            .background(Brush.verticalGradient(listOf(Color.Transparent, ViewerScreenBarColor))),
+        modifier = modifier,
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Icon(
@@ -217,7 +229,9 @@ fun VideoController(
         )
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.safeDrawingPadding()
+            modifier = Modifier
+                .background(ViewerScreenBarColor)
+                .navigationBarsPadding()
         ) {
             Text ( // Current Position
                 text = "$curMin:$curSec",
