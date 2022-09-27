@@ -39,15 +39,21 @@ private val ViewerScreenBarColor = Color(0x70000000)
 @Composable
 fun ViewerScreen(viewModel: ViewerViewModel = viewModel(), index: Int) {
     val uiState by viewModel.uiState.collectAsState()
+    val videoPlayerState = remember { VideoPlayerState(isPlayable = false) }
     ViewerContent(
         uiState = uiState,
         index = index,
+        videoPlayerState = videoPlayerState,
     )
 }
 
 @OptIn(ExperimentalPagerApi::class)
 @Composable
-fun ViewerContent(uiState: ViewerUiState, index: Int) {
+fun ViewerContent(
+    uiState: ViewerUiState,
+    index: Int,
+    videoPlayerState: VideoPlayerState,
+) {
     val systemUiController = rememberSystemUiController()
     SideEffect {
         /* Same color as shown by system when we swipe */
@@ -79,15 +85,32 @@ fun ViewerContent(uiState: ViewerUiState, index: Int) {
                 modifier = Modifier.fillMaxSize()
             ) {
                 val pagerState = rememberPagerState(initialPage = index)
+
+                // We want the page number when scrolling stops.
+                // activePage is also updated when scrolling starts but it's same as when scrolling
+                // stops, so that's no problem.
+                val activePage = remember(pagerState.isScrollInProgress) {
+                    videoPlayerState.isPlayable = true
+                    pagerState.currentPage
+                }
+                // pagerState.currentPage changes when it scrolls half of the screen width.
+                // At that time pagerState.currentPageOffset also changes.
+                // But we need an offset of the activePage until it scroll to the end of the screen width.
+                val activePageOffset = pagerState.currentPageOffset + pagerState.currentPage - activePage
+                if ((activePageOffset < -0.9) || (0.9 < activePageOffset)) {
+                    videoPlayerState.isPlayable = false
+                }
+
                 HorizontalPager(
                     count = items.size,
                     state = pagerState,
                     modifier = Modifier.fillMaxSize(),
                     itemSpacing = 10.dp
                 ) { pageIndex ->
+                    val showPlayer = (activePage == pageIndex) && videoPlayerState.isPlayable
                     Viewer(
                         item = items[pageIndex],
-                        isCurrentPage = (pagerState.currentPage == pageIndex),
+                        showPlayer = showPlayer,
                         showControllers = showControllers,
                     )
                 }
@@ -125,18 +148,22 @@ fun ViewerContent(uiState: ViewerUiState, index: Int) {
 }
 
 @Composable
-fun Viewer(item: GalleryItem, isCurrentPage: Boolean, showControllers: Boolean) {
+fun Viewer(
+    item: GalleryItem,
+    showPlayer: Boolean,
+    showControllers: Boolean,
+) {
     if (item.isVideo) {
         Box(modifier = Modifier.fillMaxSize()) {
             var isVideoRendering by remember { mutableStateOf(false) }
-            if (isCurrentPage) {
+            if (showPlayer) {
                 VideoPlayer(
                     item = item,
                     showControllers = showControllers,
                     onVideoRendering = { isVideoRendering = it },
                 )
             }
-            if (!isCurrentPage || !isVideoRendering) {
+            if (!showPlayer || !isVideoRendering) {
                 ImageViewer(item)
             }
         }
@@ -265,3 +292,6 @@ fun VideoController(
         }
     }
 }
+
+@Stable
+data class VideoPlayerState(var isPlayable: Boolean)
