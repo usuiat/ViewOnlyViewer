@@ -120,13 +120,14 @@ fun ViewerContent(
                     IconButton(
                         modifier = Modifier
                             .safeDrawingPadding()
-                            .padding(12.dp),
+                            .size(64.dp),
                         onClick = { navController.navigateUp() }
                     ) {
                         Icon(
                             imageVector = Icons.Default.ArrowBack,
                             contentDescription = stringResource(id = R.string.desc_back),
                             modifier = Modifier
+                                .padding(12.dp)
                                 .background(color = ViewerScreenBarColor, shape = CircleShape)
                                 .padding(8.dp),
                         )
