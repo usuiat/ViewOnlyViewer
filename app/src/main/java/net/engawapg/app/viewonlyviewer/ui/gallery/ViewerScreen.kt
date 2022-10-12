@@ -185,7 +185,7 @@ fun ImageViewer(item: GalleryItem) {
 
 @Composable
 fun VideoPlayer(item: GalleryItem, showControllers: Boolean, onVideoRendering: (Boolean)->Unit) {
-    var mediaPlayer: MediaPlayer? by remember { mutableStateOf(null) }
+    val mediaPlayerState = rememberMediaPlayerState()
     Box(modifier = Modifier.fillMaxSize()) {
         AndroidView(
             modifier = Modifier.fillMaxSize(),
@@ -193,8 +193,8 @@ fun VideoPlayer(item: GalleryItem, showControllers: Boolean, onVideoRendering: (
                 VideoView(context).apply {
                     setVideoURI(item.uri)
                     setOnPreparedListener { mp ->
-                        mp?.start()
-                        mediaPlayer = mp ?: null
+                        mediaPlayerState.mediaPlayer = mp
+                        mediaPlayerState.start()
                     }
                     setOnInfoListener { _, what, _ ->
                         if (what == MediaPlayer.MEDIA_INFO_VIDEO_RENDERING_START) {
@@ -207,50 +207,38 @@ fun VideoPlayer(item: GalleryItem, showControllers: Boolean, onVideoRendering: (
         )
         if (showControllers) {
             VideoController(
-                mediaPlayer = mediaPlayer,
-                modifier = Modifier.align(Alignment.BottomCenter)
+                modifier = Modifier.align(Alignment.BottomCenter),
+                isPlaying = mediaPlayerState.isPlaying,
+                duration = mediaPlayerState.duration,
+                position = mediaPlayerState.currentPosition,
+                onClickPlayPause = mediaPlayerState::toggle,
+                onPositionChange = { pos ->
+                    mediaPlayerState.pause()
+                    mediaPlayerState.seekTo(pos)
+                },
+                onPositionChangeFinished = mediaPlayerState::start,
             )
         }
     }
 }
 
 @Composable
-fun VideoController(
-    mediaPlayer: MediaPlayer?,
-    modifier: Modifier = Modifier
+private fun VideoController(
+    modifier: Modifier = Modifier,
+    isPlaying: Boolean,
+    duration: Int,
+    position: Int,
+    onClickPlayPause: () -> Unit,
+    onPositionChange: (Int) -> Unit,
+    onPositionChangeFinished: () -> Unit,
 ) {
-    var isVideoPlaying = false
-    var duration = 0
-    var curPos = 0
-    try {
-        isVideoPlaying = mediaPlayer?.isPlaying ?: false
-        duration = (mediaPlayer?.duration ?: 0)
-        curPos = (mediaPlayer?.currentPosition ?: 0)
-    } catch (e: IllegalStateException) {
-        // Nothing to do until the MediaPlayer will be prepared.
-    }
-
-    val durMin = (duration / 60000).toString()
-    val durSec = ((duration / 1000) % 60).toString().padStart(2, '0')
-    val curMin = (curPos / 60000).toString()
-    val curSec = ((curPos / 1000) % 60).toString().padStart(2, '0')
-
-    // Recompose every 100 msec while playing.
-    var updateKey by remember { mutableStateOf(0) }
-    LaunchedEffect(updateKey) {
-        delay(30)
-        updateKey++
-    }
-
     Column(
         modifier = modifier,
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        val icon = if (isVideoPlaying) Icons.Default.Pause else Icons.Default.PlayArrow
+        val icon = if (isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow
         IconButton(
-            onClick = {
-                if (isVideoPlaying) mediaPlayer?.pause() else mediaPlayer?.start()
-            },
+            onClick = onClickPlayPause,
             modifier = Modifier
                 .align(Alignment.Start)
                 .padding(12.dp)
@@ -270,27 +258,81 @@ fun VideoController(
                 .navigationBarsPadding()
         ) {
             Text ( // Current Position
-                text = "$curMin:$curSec",
+                text = "${position / 60000}:${"%02d".format((position / 1000) % 60)}",
                 modifier = Modifier.padding(20.dp)
             )
             Slider(
-                value = curPos.toFloat(),
-                onValueChange = {
-                    mediaPlayer?.pause()
-                    mediaPlayer?.seekTo(it.toInt())
-                },
+                value = position.toFloat(),
+                onValueChange = { onPositionChange(it.toInt()) },
                 modifier = Modifier
                     .weight(1f),    // Fill the width left after other components are placed.
                 valueRange = 0f..duration.toFloat(),
-                onValueChangeFinished = {
-                    mediaPlayer?.start()
-                },
+                onValueChangeFinished = onPositionChangeFinished,
             )
             Text( // Duration
-                text = "$durMin:$durSec",
+                text = "${duration / 60000}:${"%02d".format((duration / 1000) % 60)}",
                 modifier = Modifier.padding(20.dp)
             )
         }
+    }
+}
+
+@Composable
+private fun rememberMediaPlayerState(): MediaPlayerState {
+    val mediaPlayerState = remember { MediaPlayerState() }
+    LaunchedEffect(Unit) {
+        mediaPlayerState.monitor()
+    }
+    return mediaPlayerState
+}
+
+private class MediaPlayerState {
+    private var _mediaPlayer: MediaPlayer? by mutableStateOf(null)
+    var mediaPlayer: MediaPlayer?
+        get() = _mediaPlayer
+        set(value) {
+            _mediaPlayer = value
+            duration = _mediaPlayer?.duration ?: 0
+            currentPosition = 0
+        }
+
+    var isPlaying by mutableStateOf(false)
+        private set
+
+    var duration by mutableStateOf(0)
+        private set
+
+    var currentPosition by mutableStateOf(0)
+        private set
+
+    suspend fun monitor() {
+        while (true) {
+            delay(30)
+            isPlaying = mediaPlayer?.isPlaying ?: false
+            currentPosition = mediaPlayer?.currentPosition ?: 0
+        }
+    }
+
+    fun start() {
+        mediaPlayer?.start()
+    }
+
+    fun pause() {
+        mediaPlayer?.pause()
+    }
+
+    fun toggle() {
+        mediaPlayer?.apply {
+            if (isPlaying) {
+                pause()
+            } else {
+                start()
+            }
+        }
+    }
+
+    fun seekTo(msec: Int) {
+        mediaPlayer?.seekTo(msec)
     }
 }
 
