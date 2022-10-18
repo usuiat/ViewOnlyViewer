@@ -27,10 +27,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import com.google.accompanist.permissions.ExperimentalPermissionsApi
-import com.google.accompanist.permissions.isGranted
-import com.google.accompanist.permissions.rememberPermissionState
-import com.google.accompanist.permissions.shouldShowRationale
+import com.google.accompanist.permissions.*
 import net.engawapg.app.viewonlyviewer.data.ColorThemeSetting
 import net.engawapg.app.viewonlyviewer.data.DarkThemeSetting
 import net.engawapg.app.viewonlyviewer.ui.gallery.GalleryScreen
@@ -97,21 +94,26 @@ val LocalNavController = staticCompositionLocalOf<NavController> { error("No Nav
 fun AppContent() {
     /* Contents depends on the permission state */
     var permissionRequested by rememberSaveable { mutableStateOf(false) }
-    val ps = rememberPermissionState(Manifest.permission.READ_EXTERNAL_STORAGE) {
+    val permissions = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+        listOf(Manifest.permission.READ_MEDIA_IMAGES, Manifest.permission.READ_MEDIA_VIDEO)
+    } else {
+        listOf(Manifest.permission.READ_EXTERNAL_STORAGE)
+    }
+    val ps = rememberMultiplePermissionsState(permissions) {
         permissionRequested = true
     }
     when {
-        ps.status.isGranted -> {
+        ps.allPermissionsGranted -> {
             AppNavigation()
         }
-        ps.status.shouldShowRationale -> RequestPermission(shouldShowRational = true) {
-            ps.launchPermissionRequest()
+        ps.shouldShowRationale -> RequestPermission(shouldShowRational = true) {
+            ps.launchMultiplePermissionRequest()
         }
         permissionRequested -> {
             AskPermissionInSettingApp()
         }
         else -> RequestPermission(shouldShowRational = false) {
-            ps.launchPermissionRequest()
+            ps.launchMultiplePermissionRequest()
         }
     }
 }
