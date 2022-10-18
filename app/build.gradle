@@ -47,6 +47,7 @@ buildTypes {
             excludes += '/META-INF/{AL2.0,LGPL2.1}'
         }
     }
+    namespace 'net.engawapg.app.viewonlyviewer'
 }
 
 dependencies {
