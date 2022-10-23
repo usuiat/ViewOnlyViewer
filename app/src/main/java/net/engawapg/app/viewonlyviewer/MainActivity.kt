@@ -89,7 +89,7 @@ fun AppScreen(uiState: MainUiState) {
             }
             ViewOnlyViewerTheme(isDark, isDynamicColor) {
                 Surface(color = MaterialTheme.colorScheme.background) {
-                    AppContent()
+                    AppContent(isDark = isDark)
                 }
             }
         }
@@ -100,7 +100,7 @@ val LocalNavController = staticCompositionLocalOf<NavController> { error("No Nav
 
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
-fun AppContent() {
+fun AppContent(isDark: Boolean) {
     /* Contents depends on the permission state */
     var permissionRequested by rememberSaveable { mutableStateOf(false) }
     val permissions = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -113,7 +113,7 @@ fun AppContent() {
     }
     when {
         ps.allPermissionsGranted -> {
-            AppNavigation()
+            AppNavigation(isDark = isDark)
         }
         ps.shouldShowRationale -> RequestPermission(shouldShowRational = true) {
             ps.launchMultiplePermissionRequest()
@@ -128,7 +128,7 @@ fun AppContent() {
 }
 
 @Composable
-fun AppNavigation() {
+fun AppNavigation(isDark: Boolean) {
     val navController = rememberNavController()
     CompositionLocalProvider(LocalNavController provides navController) {
         NavHost(navController = navController, startDestination = "gallery") {
@@ -148,7 +148,10 @@ fun AppNavigation() {
                 arguments = listOf(navArgument("index") { type = NavType.IntType })
             ) { backStackEntry ->
                 val index = backStackEntry.arguments?.getInt("index") ?: 0
-                ViewerScreen(index = index)
+                ViewerScreen(
+                    index = index,
+                    isDark = isDark,
+                )
             }
             composable("settings") { SettingsScreen() }
             composable("setting_folder") { SettingFolderScreen() }

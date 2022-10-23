@@ -37,13 +37,18 @@ import net.engawapg.app.viewonlyviewer.util.enableFullScreen
 private val ViewerScreenBarColor = Color(0x70000000)
 
 @Composable
-fun ViewerScreen(viewModel: ViewerViewModel = viewModel(), index: Int) {
+fun ViewerScreen(
+    viewModel: ViewerViewModel = viewModel(),
+    index: Int,
+    isDark: Boolean,
+) {
     val uiState by viewModel.uiState.collectAsState()
     val videoPlayerState = remember { VideoPlayerState(isPlayable = false) }
     ViewerContent(
         uiState = uiState,
         index = index,
         videoPlayerState = videoPlayerState,
+        isDark = isDark,
     )
 }
 
@@ -53,11 +58,23 @@ fun ViewerContent(
     uiState: ViewerUiState,
     index: Int,
     videoPlayerState: VideoPlayerState,
+    isDark: Boolean,
 ) {
     val systemUiController = rememberSystemUiController()
-    SideEffect {
+    DisposableEffect(systemUiController) {
         /* Same color as shown by system when we swipe */
-        systemUiController.setSystemBarsColor(Color.Transparent)
+        systemUiController.setSystemBarsColor(
+            color = Color.Transparent,
+            darkIcons = false,
+        )
+
+        onDispose {
+            // Recover icon color depends on dark mode.
+            systemUiController.setSystemBarsColor(
+                color = Color.Transparent,
+                darkIcons = !isDark,
+            )
+        }
     }
 
     val context = LocalContext.current
