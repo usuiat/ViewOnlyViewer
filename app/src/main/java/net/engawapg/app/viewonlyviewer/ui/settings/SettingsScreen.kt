@@ -25,8 +25,8 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.google.accompanist.systemuicontroller.rememberSystemUiController
-import net.engawapg.app.viewonlyviewer.*
+import net.engawapg.app.viewonlyviewer.BuildConfig
+import net.engawapg.app.viewonlyviewer.LocalNavController
 import net.engawapg.app.viewonlyviewer.R
 import net.engawapg.app.viewonlyviewer.data.ColorThemeSetting
 import net.engawapg.app.viewonlyviewer.data.DarkThemeSetting
@@ -58,27 +58,13 @@ fun SettingsContent(
     val topAppBarState = rememberTopAppBarState()
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(topAppBarState)
 
-    /* To prevent recomposition every time scrolled */
-    val scrollFraction by remember {
-        derivedStateOf {
-            topAppBarState.overlappedFraction
-        }
-    }
-    val statusBarColor = TopAppBarDefaults.centerAlignedTopAppBarColors()
-        .containerColor(colorTransitionFraction = scrollFraction).value
-    val systemUiController = rememberSystemUiController()
-
-    SideEffect {
-        systemUiController.setStatusBarColor(statusBarColor)
-    }
-
     Scaffold(
         modifier = Modifier
             .nestedScroll(scrollBehavior.nestedScrollConnection)
-            .safeDrawingPadding(),
+            .windowInsetsPadding(WindowInsets.displayCutout.only(WindowInsetsSides.Horizontal)),
         topBar = {
             val navController = LocalNavController.current
-            SmallTopAppBar(
+            TopAppBar(
                 title = { Text(stringResource(R.string.settings))},
                 scrollBehavior = scrollBehavior,
                 navigationIcon = {
@@ -94,19 +80,18 @@ fun SettingsContent(
             )
         }
     ) { innerPadding ->
-        Box(Modifier.padding(innerPadding)) {
-            if (uiState is SettingsUiState.Success) {
-                SettingsList(
-                    darkTheme = uiState.darkTheme,
-                    onChangeDarkTheme = onChangeDarkTheme,
-                    colorTheme = uiState.colorTheme,
-                    onChangeColorTheme = onChangeColorTheme,
-                    tapCountToOpenSettings = uiState.tapCountToOpenSettings,
-                    onChangeTapCountToOpenSettings = onChangeTapCountToOpenSettings,
-                    multiGoBack = uiState.multiGoBack,
-                    onChangeMultiGoBack = onChangeMultiGoBack,
-                )
-            }
+        if (uiState is SettingsUiState.Success) {
+            SettingsList(
+                darkTheme = uiState.darkTheme,
+                onChangeDarkTheme = onChangeDarkTheme,
+                colorTheme = uiState.colorTheme,
+                onChangeColorTheme = onChangeColorTheme,
+                tapCountToOpenSettings = uiState.tapCountToOpenSettings,
+                onChangeTapCountToOpenSettings = onChangeTapCountToOpenSettings,
+                multiGoBack = uiState.multiGoBack,
+                onChangeMultiGoBack = onChangeMultiGoBack,
+                contentPadding = innerPadding,
+            )
         }
     }
 }
@@ -121,8 +106,10 @@ fun SettingsList(
     onChangeTapCountToOpenSettings: (Int) -> Unit,
     multiGoBack: Int,
     onChangeMultiGoBack: (Int) -> Unit,
+    contentPadding: PaddingValues,
 ) {
     LazyColumn(
+        contentPadding = contentPadding,
         modifier = Modifier.fillMaxWidth()
     ) {
         item { SettingsHeader(title = stringResource(id = R.string.setting_header_display)) }

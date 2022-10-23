@@ -16,6 +16,7 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.core.view.WindowCompat
@@ -28,6 +29,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.google.accompanist.permissions.*
+import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import net.engawapg.app.viewonlyviewer.data.ColorThemeSetting
 import net.engawapg.app.viewonlyviewer.data.DarkThemeSetting
 import net.engawapg.app.viewonlyviewer.ui.gallery.GalleryScreen
@@ -78,6 +80,13 @@ fun AppScreen(uiState: MainUiState) {
                 DarkThemeSetting.UseSystemSettings -> isSystemInDarkTheme()
             }
             val isDynamicColor = uiState.colorTheme == ColorThemeSetting.Wallpaper
+            val systemUiController = rememberSystemUiController()
+            LaunchedEffect(systemUiController, isDark) {
+                systemUiController.setSystemBarsColor(
+                    color = Color.Transparent,
+                    darkIcons = !isDark,
+                )
+            }
             ViewOnlyViewerTheme(isDark, isDynamicColor) {
                 Surface(color = MaterialTheme.colorScheme.background) {
                     AppContent()

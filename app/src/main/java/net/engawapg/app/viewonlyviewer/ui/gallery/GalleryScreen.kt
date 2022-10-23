@@ -28,7 +28,6 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
-import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -83,21 +82,6 @@ fun GalleryContent(
 ) {
     val topAppBarState = rememberTopAppBarState()
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(topAppBarState)
-
-    /* To prevent recomposition every time scrolled */
-    val scrollFraction by remember {
-        derivedStateOf {
-            topAppBarState.overlappedFraction
-        }
-    }
-    val statusBarColor = TopAppBarDefaults.centerAlignedTopAppBarColors()
-            .containerColor(colorTransitionFraction = scrollFraction).value
-    val systemUiController = rememberSystemUiController()
-
-    SideEffect {
-        systemUiController.setStatusBarColor(statusBarColor)
-    }
-
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
 
@@ -105,7 +89,7 @@ fun GalleryContent(
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
         modifier = Modifier
             .nestedScroll(scrollBehavior.nestedScrollConnection)
-            .safeDrawingPadding(),
+            .windowInsetsPadding(WindowInsets.displayCutout.only(WindowInsetsSides.Horizontal)),
         topBar = {
             CenterAlignedTopAppBar(
                 title = { Text(stringResource(R.string.app_name)) },
@@ -135,10 +119,8 @@ fun GalleryContent(
             )
         }
     ) { innerPadding ->
-        Box(Modifier.padding(innerPadding)) {
-            if (uiState is GalleryUiState.Success) {
-                Gallery(uiState.galleryItems, onItemSelected)
-            }
+        if (uiState is GalleryUiState.Success) {
+            Gallery(uiState.galleryItems, innerPadding, onItemSelected)
         }
     }
 
@@ -183,9 +165,16 @@ fun MultiTapIconButton(
 }
 
 @Composable
-fun Gallery(items: List<GalleryItem>, onItemSelected: (Int)->Unit = {}) {
+fun Gallery(
+    items: List<GalleryItem>,
+    contentPadding: PaddingValues,
+    onItemSelected: (Int)->Unit = {}
+) {
     if (items.isNotEmpty()) {
-        LazyVerticalGrid(columns = GridCells.Fixed(COLUMN_NUM)) {
+        LazyVerticalGrid(
+            columns = GridCells.Fixed(COLUMN_NUM),
+            contentPadding = contentPadding,
+        ) {
             itemsIndexed(items) { index, item ->
                 GalleryItem(item = item, onSelected = { onItemSelected(index) })
             }

@@ -7,7 +7,9 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
@@ -17,7 +19,6 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
-import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import net.engawapg.app.viewonlyviewer.LocalNavController
 import net.engawapg.app.viewonlyviewer.R
 
@@ -41,27 +42,13 @@ fun SettingFolderContent(
     val topAppBarState = rememberTopAppBarState()
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(topAppBarState)
 
-    /* To prevent recomposition every time scrolled */
-    val scrollFraction by remember {
-        derivedStateOf {
-            topAppBarState.overlappedFraction
-        }
-    }
-    val statusBarColor = TopAppBarDefaults.centerAlignedTopAppBarColors()
-        .containerColor(colorTransitionFraction = scrollFraction).value
-    val systemUiController = rememberSystemUiController()
-
-    SideEffect {
-        systemUiController.setStatusBarColor(statusBarColor)
-    }
-
     Scaffold(
         modifier = Modifier
             .nestedScroll(scrollBehavior.nestedScrollConnection)
-            .safeDrawingPadding(),
+            .windowInsetsPadding(WindowInsets.displayCutout.only(WindowInsetsSides.Horizontal)),
         topBar = {
             val navController = LocalNavController.current
-            SmallTopAppBar(
+            TopAppBar(
                 title = { Text(stringResource(R.string.setting_title_folder)) },
                 scrollBehavior = scrollBehavior,
                 navigationIcon = {
