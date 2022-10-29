@@ -15,11 +15,16 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.toSize
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
@@ -28,11 +33,11 @@ import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.rememberPagerState
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import net.engawapg.app.viewonlyviewer.LocalNavController
 import net.engawapg.app.viewonlyviewer.R
 import net.engawapg.app.viewonlyviewer.data.GalleryItem
-import net.engawapg.app.viewonlyviewer.util.disableFullScreen
-import net.engawapg.app.viewonlyviewer.util.enableFullScreen
+import net.engawapg.app.viewonlyviewer.util.*
 
 private val ViewerScreenBarColor = Color(0x70000000)
 
@@ -182,21 +187,69 @@ fun Viewer(
                 )
             }
             if (!showPlayer || !isVideoRendering) {
-                ImageViewer(item)
+                AsyncImage(
+                    model = item.uri,
+                    contentDescription = "Image",
+                    modifier = Modifier.fillMaxSize(),
+                    contentScale = ContentScale.Fit
+                )
             }
         }
     } else {
-        ImageViewer(item)
+        Box(
+            // Prevent zoomed image from going beyond the page bounds.
+            modifier = Modifier
+                .fillMaxSize()
+                .clipToBounds()
+        ) {
+            ImageViewer(item)
+        }
     }
 }
 
 @Composable
 fun ImageViewer(item: GalleryItem) {
+    val zoomState = rememberContentZoomState(maxScale = 8f)
+    val scope = rememberCoroutineScope()
+
     AsyncImage(
         model = item.uri,
         contentDescription = "Image",
-        modifier = Modifier.fillMaxSize(),
-        contentScale = ContentScale.Fit
+        contentScale = ContentScale.Fit,
+        onSuccess = { state ->
+            zoomState.setContentSize(state.painter.intrinsicSize)
+        },
+        modifier = Modifier
+            .onSizeChanged { size ->
+                zoomState.setElementSize(size.toSize())
+            }
+            .pointerInput(Unit) {
+                detectTransformGesturesWithoutConsuming(
+                    onGestureStart = {
+                        zoomState.startGesture()
+                    },
+                    onGesture = { event, centroid, pan, zoom, _ ->
+                        if (zoomState.canConsumeGesture(pan, zoom)) {
+                            event.consumeChanges()
+                            scope.launch {
+                                zoomState.applyGesture(centroid, pan, zoom, event.changes[0].uptimeMillis)
+                            }
+                        }
+                    },
+                    onGestureEnd = {
+                        scope.launch {
+                            zoomState.fling()
+                        }
+                    }
+                )
+            }
+            .graphicsLayer(
+                scaleX = zoomState.scale,
+                scaleY = zoomState.scale,
+                translationX = zoomState.offset.x,
+                translationY = zoomState.offset.y,
+            )
+            .fillMaxSize(),
     )
 }
 

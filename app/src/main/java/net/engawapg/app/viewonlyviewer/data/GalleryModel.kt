@@ -11,7 +11,12 @@ import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
 
 @Stable
-data class GalleryItem(val uri: Uri, val isVideo: Boolean)
+data class GalleryItem(
+    val uri: Uri,
+    val isVideo: Boolean,
+    val height: Int,
+    val width: Int,
+)
 
 @Stable
 data class FolderItem(
@@ -36,6 +41,8 @@ class GalleryModel(private val context: Context) {
             MediaStore.Files.FileColumns.DATE_ADDED,
             MediaStore.Files.FileColumns.MEDIA_TYPE,
             MediaStore.Files.FileColumns.PARENT,
+            MediaStore.MediaColumns.HEIGHT,
+            MediaStore.MediaColumns.WIDTH,
         )
         /* Question marks for the number of the set size */
         val questions = ignoreFolderIds.joinToString { "?" }
@@ -54,6 +61,8 @@ class GalleryModel(private val context: Context) {
             /* 必要な情報が格納されている列番号を取得する。 */
             val idCol = cursor.getColumnIndexOrThrow(MediaStore.Files.FileColumns._ID)
             val mediaTypeCol = cursor.getColumnIndexOrThrow(MediaStore.Files.FileColumns.MEDIA_TYPE)
+            val heightCol = cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.HEIGHT)
+            val widthCol = cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.WIDTH)
 
             /* 順にカーソルを動かしながら、情報を取得していく。*/
             while (cursor.moveToNext()) {
@@ -63,9 +72,11 @@ class GalleryModel(private val context: Context) {
                 /* MediaTypeを取得 */
                 val mediaType = cursor.getInt(mediaTypeCol)
                 val isVideo = (mediaType == MediaStore.Files.FileColumns.MEDIA_TYPE_VIDEO)
+                /* Get image size */
+                val height = cursor.getInt(heightCol)
+                val width = cursor.getInt(widthCol)
 
-                list.add(GalleryItem(uri, isVideo))
-//                Log.d("GalleryModel", "$uri $isVideo")
+                list.add(GalleryItem(uri, isVideo, height, width))
             }
         }
         galleryItemsFlow.tryEmit(list)
