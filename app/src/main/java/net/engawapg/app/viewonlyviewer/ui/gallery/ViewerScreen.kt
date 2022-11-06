@@ -311,12 +311,13 @@ private fun VideoController(
             onClick = onClickPlayPause,
             modifier = Modifier
                 .align(Alignment.Start)
-                .padding(12.dp)
+                .size(64.dp)
         ) {
             Icon(
                 imageVector = icon,
                 contentDescription = stringResource(id = R.string.desc_playpause),
                 modifier = Modifier
+                    .padding(12.dp)
                     .background(color = ViewerScreenBarColor, shape = CircleShape)
                     .padding(8.dp)
             )
