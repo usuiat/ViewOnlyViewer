@@ -232,7 +232,12 @@ fun ImageViewer(item: GalleryItem) {
                         if (zoomState.canConsumeGesture(pan, zoom)) {
                             event.consumeChanges()
                             scope.launch {
-                                zoomState.applyGesture(centroid, pan, zoom, event.changes[0].uptimeMillis)
+                                zoomState.applyGesture(
+                                    centroid,
+                                    pan,
+                                    zoom,
+                                    event.changes[0].uptimeMillis
+                                )
                             }
                         }
                     },
@@ -257,11 +262,11 @@ fun ImageViewer(item: GalleryItem) {
 fun VideoPlayer(item: GalleryItem, showControllers: Boolean, onVideoRendering: (Boolean)->Unit) {
     val mediaPlayerState = rememberMediaPlayerState()
     Box(modifier = Modifier.fillMaxSize()) {
+        val scope = rememberCoroutineScope()
         AndroidView(
             modifier = Modifier.fillMaxSize(),
             factory = { context ->
                 VideoView(context).apply {
-                    setVideoURI(item.uri)
                     setOnPreparedListener { mp ->
                         mediaPlayerState.mediaPlayer = mp
                         mediaPlayerState.start()
@@ -271,6 +276,10 @@ fun VideoPlayer(item: GalleryItem, showControllers: Boolean, onVideoRendering: (
                             onVideoRendering(true)
                         }
                         false
+                    }
+                    scope.launch {
+                        delay(100) // Avoid the problem of OnPrepare not being called.
+                        setVideoURI(item.uri)
                     }
                 }
             },
