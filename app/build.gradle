@@ -28,6 +28,10 @@ buildTypes {
     staging {
         initWith release
         signingConfig signingConfigs.debug
+        applicationIdSuffix = ".s"
+    }
+    debug {
+        applicationIdSuffix = ".d"
     }
 }
     compileOptions {
