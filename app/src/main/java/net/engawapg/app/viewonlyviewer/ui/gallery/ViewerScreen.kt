@@ -388,8 +388,13 @@ private class MediaPlayerState {
     suspend fun monitor() {
         while (true) {
             delay(30)
-            isPlaying = mediaPlayer?.isPlaying ?: false
-            currentPosition = mediaPlayer?.currentPosition ?: 0
+            try {
+                isPlaying = mediaPlayer?.isPlaying ?: false
+                currentPosition = mediaPlayer?.currentPosition ?: 0
+            } catch (e: IllegalStateException) {
+                isPlaying = false
+                currentPosition = 0
+            }
         }
     }
 
