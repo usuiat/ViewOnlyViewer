@@ -248,12 +248,12 @@ fun ImageViewer(item: GalleryItem) {
                     }
                 )
             }
-            .graphicsLayer(
-                scaleX = zoomState.scale,
-                scaleY = zoomState.scale,
-                translationX = zoomState.offset.x,
-                translationY = zoomState.offset.y,
-            )
+            .graphicsLayer {
+                scaleX = zoomState.scale
+                scaleY = zoomState.scale
+                translationX = zoomState.offset.x
+                translationY = zoomState.offset.y
+            }
             .fillMaxSize(),
     )
 }
