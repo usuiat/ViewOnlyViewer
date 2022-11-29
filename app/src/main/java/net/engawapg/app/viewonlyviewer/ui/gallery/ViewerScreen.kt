@@ -196,14 +196,7 @@ fun Viewer(
             }
         }
     } else {
-        Box(
-            // Prevent zoomed image from going beyond the page bounds.
-            modifier = Modifier
-                .fillMaxSize()
-                .clipToBounds()
-        ) {
-            ImageViewer(item)
-        }
+        ImageViewer(item)
     }
 }
 
@@ -220,6 +213,8 @@ fun ImageViewer(item: GalleryItem) {
             zoomState.setContentSize(state.painter.intrinsicSize)
         },
         modifier = Modifier
+            .fillMaxSize()
+            .clipToBounds()
             .onSizeChanged { size ->
                 zoomState.setElementSize(size.toSize())
             }
@@ -254,7 +249,6 @@ fun ImageViewer(item: GalleryItem) {
                 translationX = zoomState.offset.x
                 translationY = zoomState.offset.y
             }
-            .fillMaxSize(),
     )
 }
 
