@@ -4,50 +4,50 @@ plugins {
 }
 
 android {
-    compileSdk 36
+    compileSdk = 36
 
     defaultConfig {
-        applicationId "net.engawapg.app.viewonlyviewer"
-        minSdk 26
-        targetSdk 36
-        versionCode 9
-        versionName "1.5.1"
+        applicationId = "net.engawapg.app.viewonlyviewer"
+        minSdk = 26
+        targetSdk = 36
+        versionCode = 9
+        versionName = "1.5.1"
 
-        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
-            useSupportLibrary true
+            useSupportLibrary = true
         }
         resConfigs "en", "ja"
     }
 
-buildTypes {
-    release {
-        minifyEnabled true
-        proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+    buildTypes {
+        release {
+            minifyEnabled = true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+        staging {
+            initWith release
+            signingConfig = signingConfigs.debug
+            applicationIdSuffix = ".s"
+        }
+        debug {
+            applicationIdSuffix = ".d"
+        }
     }
-    staging {
-        initWith release
-        signingConfig signingConfigs.debug
-        applicationIdSuffix = ".s"
-    }
-    debug {
-        applicationIdSuffix = ".d"
-    }
-}
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_17
-        targetCompatibility JavaVersion.VERSION_17
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
     buildFeatures {
-        compose true
-        buildConfig true
+        compose = true
+        buildConfig = true
     }
     packagingOptions {
         resources {
             excludes += '/META-INF/{AL2.0,LGPL2.1}'
         }
     }
-    namespace 'net.engawapg.app.viewonlyviewer'
+    namespace = 'net.engawapg.app.viewonlyviewer'
 }
 
 kotlin {
