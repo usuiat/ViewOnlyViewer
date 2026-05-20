@@ -85,8 +85,6 @@ dependencies {
     implementation libs.androidx.navigation.compose
 
     // Accompanist
-    implementation libs.accompanist.pager
-    implementation libs.accompanist.systemuicontroller
     implementation libs.accompanist.permissions
 
     // DataStore

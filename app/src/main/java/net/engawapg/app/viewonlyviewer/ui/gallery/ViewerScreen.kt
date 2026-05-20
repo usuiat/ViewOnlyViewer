@@ -6,6 +6,8 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -26,12 +28,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.toSize
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.core.view.WindowInsetsControllerCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
-import com.google.accompanist.pager.ExperimentalPagerApi
-import com.google.accompanist.pager.HorizontalPager
-import com.google.accompanist.pager.rememberPagerState
-import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import net.engawapg.app.viewonlyviewer.LocalNavController
@@ -57,7 +56,6 @@ fun ViewerScreen(
     )
 }
 
-@OptIn(ExperimentalPagerApi::class)
 @Composable
 fun ViewerContent(
     uiState: ViewerUiState,
@@ -65,24 +63,21 @@ fun ViewerContent(
     videoPlayerState: VideoPlayerState,
     isDark: Boolean,
 ) {
-    val systemUiController = rememberSystemUiController()
-    DisposableEffect(systemUiController) {
-        /* Same color as shown by system when we swipe */
-        systemUiController.setSystemBarsColor(
-            color = Color.Transparent,
-            darkIcons = false,
-        )
+    val context = LocalContext.current
+    DisposableEffect(Unit) {
+        val window = context.findActivity().window
+        val controller = WindowInsetsControllerCompat(window, window.decorView)
+        /* Use light icons while the viewer is shown so they stay visible on the dark backdrop. */
+        controller.isAppearanceLightStatusBars = false
+        controller.isAppearanceLightNavigationBars = false
 
         onDispose {
             // Recover icon color depends on dark mode.
-            systemUiController.setSystemBarsColor(
-                color = Color.Transparent,
-                darkIcons = !isDark,
-            )
+            controller.isAppearanceLightStatusBars = !isDark
+            controller.isAppearanceLightNavigationBars = !isDark
         }
     }
 
-    val context = LocalContext.current
     var isFullScreen by remember { mutableStateOf(false) }
     var showControllers by remember { mutableStateOf(true) }
     val items = uiState.galleryItems
@@ -106,7 +101,10 @@ fun ViewerContent(
             Box(
                 modifier = Modifier.fillMaxSize()
             ) {
-                val pagerState = rememberPagerState(initialPage = index)
+                val pagerState = rememberPagerState(
+                    initialPage = index,
+                    pageCount = { items.size },
+                )
 
                 // We want the page number when scrolling stops.
                 // activePage is also updated when scrolling starts but it's same as when scrolling
@@ -116,18 +114,17 @@ fun ViewerContent(
                     pagerState.currentPage
                 }
                 // pagerState.currentPage changes when it scrolls half of the screen width.
-                // At that time pagerState.currentPageOffset also changes.
+                // At that time pagerState.currentPageOffsetFraction also changes.
                 // But we need an offset of the activePage until it scroll to the end of the screen width.
-                val activePageOffset = pagerState.currentPageOffset + pagerState.currentPage - activePage
+                val activePageOffset = pagerState.currentPageOffsetFraction + pagerState.currentPage - activePage
                 if ((activePageOffset < -0.9) || (0.9 < activePageOffset)) {
                     videoPlayerState.isPlayable = false
                 }
 
                 HorizontalPager(
-                    count = items.size,
                     state = pagerState,
                     modifier = Modifier.fillMaxSize(),
-                    itemSpacing = 10.dp
+                    pageSpacing = 10.dp,
                 ) { pageIndex ->
                     val showPlayer = (activePage == pageIndex) && videoPlayerState.isPlayable
                     Viewer(

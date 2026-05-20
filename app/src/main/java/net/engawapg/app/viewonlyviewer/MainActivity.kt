@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.view.WindowManager
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.Button
@@ -16,10 +17,9 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
@@ -29,7 +29,6 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.google.accompanist.permissions.*
-import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import net.engawapg.app.viewonlyviewer.data.ColorThemeSetting
 import net.engawapg.app.viewonlyviewer.data.DarkThemeSetting
 import net.engawapg.app.viewonlyviewer.ui.gallery.GalleryScreen
@@ -38,15 +37,15 @@ import net.engawapg.app.viewonlyviewer.ui.gallery.ViewerScreen
 import net.engawapg.app.viewonlyviewer.ui.settings.SettingFolderScreen
 import net.engawapg.app.viewonlyviewer.ui.settings.SettingsScreen
 import net.engawapg.app.viewonlyviewer.ui.theme.ViewOnlyViewerTheme
+import net.engawapg.app.viewonlyviewer.util.findActivity
 
 class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
         /* Throughout the app, stretch the content area to the edge of the window to achieve
            smooth transition between fullscreen and non-fullscreen content. */
-        WindowCompat.setDecorFitsSystemWindows(window, false)
+        enableEdgeToEdge()
+        super.onCreate(savedInstanceState)
 
         /* Disable the system gestures while full screen mode. */
         WindowInsetsControllerCompat(window, window.decorView).systemBarsBehavior =
@@ -57,8 +56,6 @@ class MainActivity : ComponentActivity() {
             window.attributes.layoutInDisplayCutoutMode =
                 WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES
         }
-
-        window.statusBarColor = android.graphics.Color.TRANSPARENT
 
         setContent {
             val viewModel: MainViewModel = viewModel()
@@ -80,12 +77,13 @@ fun AppScreen(uiState: MainUiState) {
                 DarkThemeSetting.UseSystemSettings -> isSystemInDarkTheme()
             }
             val isDynamicColor = uiState.colorTheme == ColorThemeSetting.Wallpaper
-            val systemUiController = rememberSystemUiController()
-            LaunchedEffect(systemUiController, isDark) {
-                systemUiController.setSystemBarsColor(
-                    color = Color.Transparent,
-                    darkIcons = !isDark,
-                )
+            val context = LocalContext.current
+            LaunchedEffect(isDark) {
+                val window = context.findActivity().window
+                WindowInsetsControllerCompat(window, window.decorView).apply {
+                    isAppearanceLightStatusBars = !isDark
+                    isAppearanceLightNavigationBars = !isDark
+                }
             }
             ViewOnlyViewerTheme(isDark, isDynamicColor) {
                 Surface(color = MaterialTheme.colorScheme.background) {
