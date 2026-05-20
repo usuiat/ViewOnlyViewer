@@ -2,10 +2,21 @@ package net.engawapg.app.viewonlyviewer.ui.gallery
 
 import android.media.MediaPlayer
 import android.widget.VideoView
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawingPadding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
@@ -13,30 +24,44 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.Slider
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.Stable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.toSize
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
+import coil.compose.rememberAsyncImagePainter
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import net.engawapg.app.viewonlyviewer.LocalNavController
 import net.engawapg.app.viewonlyviewer.R
 import net.engawapg.app.viewonlyviewer.data.GalleryItem
-import net.engawapg.app.viewonlyviewer.util.*
+import net.engawapg.app.viewonlyviewer.util.disableFullScreen
+import net.engawapg.app.viewonlyviewer.util.enableFullScreen
+import net.engawapg.app.viewonlyviewer.util.findActivity
+import net.engawapg.lib.zoomable.rememberZoomState
+import net.engawapg.lib.zoomable.zoomable
 
 private val ViewerScreenBarColor = Color(0x70000000)
 
@@ -199,53 +224,16 @@ fun Viewer(
 
 @Composable
 fun ImageViewer(item: GalleryItem) {
-    val zoomState = rememberContentZoomState(maxScale = 8f)
-    val scope = rememberCoroutineScope()
-
-    AsyncImage(
-        model = item.uri,
+    val painter = rememberAsyncImagePainter(item.uri)
+    val zoomState = rememberZoomState(contentSize = painter.intrinsicSize)
+    Image(
+        painter = painter,
         contentDescription = "Image",
         contentScale = ContentScale.Fit,
-        onSuccess = { state ->
-            zoomState.setContentSize(state.painter.intrinsicSize)
-        },
         modifier = Modifier
             .fillMaxSize()
             .clipToBounds()
-            .onSizeChanged { size ->
-                zoomState.setElementSize(size.toSize())
-            }
-            .pointerInput(Unit) {
-                detectTransformGesturesWithoutConsuming(
-                    onGestureStart = {
-                        zoomState.startGesture()
-                    },
-                    onGesture = { event, centroid, pan, zoom, _ ->
-                        if (zoomState.canConsumeGesture(pan, zoom)) {
-                            event.consumeChanges()
-                            scope.launch {
-                                zoomState.applyGesture(
-                                    centroid,
-                                    pan,
-                                    zoom,
-                                    event.changes[0].uptimeMillis
-                                )
-                            }
-                        }
-                    },
-                    onGestureEnd = {
-                        scope.launch {
-                            zoomState.fling()
-                        }
-                    }
-                )
-            }
-            .graphicsLayer {
-                scaleX = zoomState.scale
-                scaleY = zoomState.scale
-                translationX = zoomState.offset.x
-                translationY = zoomState.offset.y
-            }
+            .zoomable(zoomState)
     )
 }
 
